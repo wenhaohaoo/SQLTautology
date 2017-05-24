@@ -1,9 +1,11 @@
+import java.util.Arrays;
+import java.util.List;
 
 public class ExpressionHelper {
+    public static List<String> validComparatorList = Arrays.asList("=", ">", "<", ">=", "<=", "!=", "<>");
 
     public static boolean isValidNumber(String numberExpression) {
         return numberExpression.matches("-?\\d+(\\.\\d+)?");
-
     }
 
     public static boolean isValidVariable(String variableExpression) {
@@ -11,15 +13,20 @@ public class ExpressionHelper {
     }
 
     public static boolean isValidString(String stringExpression) {
-        return true;
+        if(stringExpression.matches("^\'.*\'$")) {
+            //            String subStringExpression = stringExpression.substring(1,stringExpression.length()-1);
+            //            System.out.println(subStringExpression);
+            return !stringExpression.matches(".*(\'\\p{Space}\').*");
+        }
+        return false;
     }
 
     public static boolean isValidNull(String nullExpression) {
-        return true;
+        return nullExpression.equalsIgnoreCase("NULL");
     }
 
     public static boolean isValidComparator(String comparatorExpression) {
-        return true;
+        return validComparatorList.contains(comparatorExpression);
     }
 
     public static String[] ParseSingle(String expression) {
@@ -51,6 +58,11 @@ public class ExpressionHelper {
     }
 
     public static void main(String[] args) {
-        System.out.println(isValidNumber("-1.23"));
+        System.out.println(isValidNumber("[-1.23]"));
+        System.out.println(isValidString("'this' ' is incorrect'"));
+        System.out.println(isValidString("'this'' '' is incorrect'"));//??
+        System.out.println(isValidNull("something.NULL"));
+        System.out.println(isValidNull("NuLL"));
     }
+
 }
