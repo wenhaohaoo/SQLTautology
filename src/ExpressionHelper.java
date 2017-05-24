@@ -526,7 +526,7 @@ public class ExpressionHelper {
         if(stringExpression.matches("^\'.*\'$")) {
             //            String subStringExpression = stringExpression.substring(1,stringExpression.length()-1);
             //            System.out.println(subStringExpression);
-            return !stringExpression.matches(".*(\'\\p{Space}\').*");
+            return !stringExpression.matches(".*(\'\\p{Space}+\').*");
         }
         return false;
     }
@@ -569,10 +569,12 @@ public class ExpressionHelper {
 
     public static void main(String[] args) {
         System.out.println(isValidNumber("[-1.23]"));
-        System.out.println(isValidString("'this' ' is incorrect'"));
+        System.out.println(isValidString("'this'  ' is incorrect'"));
         System.out.println(isValidString("'this'' '' is incorrect'"));//??
         System.out.println(isValidNull("something.NULL"));
         System.out.println(isValidNull("NuLL"));
+        System.out.println(isValidVariable("myVariableName.  [havingDot]   .andAnotherDot"));
+        System.out.println(isValidVariable("[myVariableName]"));
     }
 
 }
