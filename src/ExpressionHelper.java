@@ -545,31 +545,55 @@ public class ExpressionHelper {
     }
 
     public static String[] parseSingle(String expression) {
-    	String[] components = expression.split("(?<=[-+*/%()])|(?=[()-+*/%])");
+//    	String[] components = expression.split("(?<=[-+*/%()])|(?=[()-+*/%])");
+//    	ArrayList<String> result = new ArrayList<String>();
+//    	StringBuilder sb = new StringBuilder();
+//    	for (int i = 0; i < components.length; i++) {
+//    		if (components[i].trim().equals("(")) {
+//    			for (int j = i; j < components.length; j++) {
+//    				sb.append(components[j]);
+//					i++;
+//    				if (components[j].trim().equals(")")) {
+//    					break;
+//    				}
+//    			}
+//    			result.add(sb.toString().trim());
+//    			sb = new StringBuilder();
+//    		} else {
+//    			if (!components[i].equals(" ")) {
+//    				result.add(components[i].trim());
+//    			}
+//    		}
+//    	}
+    	
+    	StringTokenizer tokenizer = new StringTokenizer(expression, ")-+*/%(", true);
     	ArrayList<String> result = new ArrayList<String>();
     	StringBuilder sb = new StringBuilder();
-    	for (int i = 0; i < components.length; i++) {
-    		if (components[i].trim().equals("(")) {
-    			for (int j = i; j < components.length; j++) {
-    				sb.append(components[j]);
-					i++;
-    				if (components[j].trim().equals(")")) {
-    					break;
-    				}
-    			}
-    			result.add(sb.toString().trim());
-    			sb = new StringBuilder();
-    		} else {
-    			if (!components[i].equals(" ")) {
-    				result.add(components[i].trim());
-    			}
-    		}
-    	}
+    	boolean appending = false;
+    	
+        while (tokenizer.hasMoreTokens()) {
+        	String token = tokenizer.nextToken();
+        	if (token.trim().equals("(")) {
+        		sb.append(token);
+        		appending = true;
+        	} else if (token.trim().equals(")")) {
+        		sb.append(token);
+        		appending = false;
+        		result.add(sb.toString());
+        		sb = new StringBuilder();
+        	} else if (!token.equals(" ")) {
+        		if (appending) {
+        			sb.append(token);
+        		} else {
+        			result.add(token);
+        		}
+        	}
+        }
         return result.toArray(new String[result.size()]);
     }
 
-    public static boolean standardize(String basicExpression) {
-        return true;
+    public static String standardize(String basicExpression) {
+        return null;
     }
 
     public static boolean isValidBasicExpression(String basicExpression) {
@@ -593,7 +617,7 @@ public class ExpressionHelper {
     }
 
     public static void main(String[] args) {
-        String[] rs = parseSingle("(1.1 + 5.32 * 7.56) + (1.2 * varName + varName2 % 5)");
+        String[] rs = parseSingle("(1.1 + 5.32 * 7.56) + 1.2 * varName + (varName2 % 5)");
         for (int i = 0; i < rs.length; i++) {
         	System.out.println(rs[i]);
         }
