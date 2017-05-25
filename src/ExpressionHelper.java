@@ -1,8 +1,13 @@
 
+import java.io.StringBufferInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import javafx.scene.media.EqualizerBand;
+import javafx.scene.shape.TriangleMesh;
 
 public class ExpressionHelper {
     private static HashSet<String> reserved;
@@ -539,8 +544,28 @@ public class ExpressionHelper {
         return validComparatorList.contains(comparatorExpression);
     }
 
-    public static String[] ParseSingle(String expression) {
-        return new String[1];
+    public static String[] parseSingle(String expression) {
+    	String[] components = expression.split("(?<=[-+*/%()])|(?=[()-+*/%])");
+    	ArrayList<String> result = new ArrayList<String>();
+    	StringBuilder sb = new StringBuilder();
+    	for (int i = 0; i < components.length; i++) {
+    		if (components[i].trim().equals("(")) {
+    			for (int j = i; j < components.length; j++) {
+    				sb.append(components[j]);
+					i++;
+    				if (components[j].trim().equals(")")) {
+    					break;
+    				}
+    			}
+    			result.add(sb.toString().trim());
+    			sb = new StringBuilder();
+    		} else {
+    			if (!components[i].equals(" ")) {
+    				result.add(components[i].trim());
+    			}
+    		}
+    	}
+        return result.toArray(new String[result.size()]);
     }
 
     public static boolean standardize(String basicExpression) {
@@ -568,13 +593,10 @@ public class ExpressionHelper {
     }
 
     public static void main(String[] args) {
-        System.out.println(isValidNumber("[-1.23]"));
-        System.out.println(isValidString("'this'  ' is incorrect'"));
-        System.out.println(isValidString("'this'' '' is incorrect'"));//??
-        System.out.println(isValidNull("something.NULL"));
-        System.out.println(isValidNull("NuLL"));
-        System.out.println(isValidVariable("myVariableName.  [havingDot]   .andAnotherDot"));
-        System.out.println(isValidVariable("[myVariableName]"));
+        String[] rs = parseSingle("(1.1 + 5.32 * 7.56) + (1.2 * varName + varName2 % 5)");
+        for (int i = 0; i < rs.length; i++) {
+        	System.out.println(rs[i]);
+        }
     }
 
 }
