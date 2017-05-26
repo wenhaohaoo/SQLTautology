@@ -1,13 +1,9 @@
 
-import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import javafx.scene.media.EqualizerBand;
-import javafx.scene.shape.TriangleMesh;
 
 public class ExpressionHelper {
     private static HashSet<String> reserved;
@@ -485,46 +481,51 @@ public class ExpressionHelper {
         StringTokenizer tokenizer = new StringTokenizer(variableExpression, ".");
         initializeReservedHashSet();
 
-        while (tokenizer.hasMoreTokens()) {
-            String token = tokenizer.nextToken();
-            String trimmedToken = token.trim();
-
-            if (trimmedToken.startsWith("[") && trimmedToken.endsWith("]")) {
-
-                if (trimmedToken.substring(1, trimmedToken.length()-1).startsWith(" ")
-                        || trimmedToken.substring(1, trimmedToken.length()-1).endsWith(" ")) {
-                    System.out.println(5);
-                    return false;
-                }  else if (Character.isDigit(trimmedToken.substring(1, trimmedToken.length()-1).charAt(0))) {
-                    System.out.println(7);
-                    return false;
-                }
-
-            } else {
-
-                if (!trimmedToken.matches("^[a-zA-Z][_$a-zA-Z0-9]*+")) {
-                    System.out.println(1);
-                    return false;
-                }  else if (trimmedToken.startsWith("[") && !trimmedToken.endsWith("]")) {
-                    System.out.println(2);
-                    return false;
-                } else if (!trimmedToken.startsWith("[") && trimmedToken.endsWith("]")) {
-                    System.out.println(3);
-                    return false;
-                }  else if (trimmedToken.contains(" ")) {
-                    System.out.println(4);
-                    return false;
-                }  else if (Character.isDigit(trimmedToken.charAt(0))) {
-                    System.out.println(6);
-                    return false;
-                }  else if (reserved.contains(trimmedToken.toUpperCase())) {
-                    System.out.println(8);
-                    return false;
-                }
-
-            }
+        if (tokenizer.countTokens() == 0) {
+        	return false;
+        } else {
+        	
+	        while (tokenizer.hasMoreTokens()) {
+	            String token = tokenizer.nextToken();
+	            String trimmedToken = token.trim();
+	
+	            if (trimmedToken.startsWith("[") && trimmedToken.endsWith("]")) {
+	
+	                if (trimmedToken.substring(1, trimmedToken.length()-1).startsWith(" ")
+	                        || trimmedToken.substring(1, trimmedToken.length()-1).endsWith(" ")) {
+	                    System.out.println(5);
+	                    return false;
+	                }  else if (Character.isDigit(trimmedToken.substring(1, trimmedToken.length()-1).charAt(0))) {
+	                    System.out.println(7);
+	                    return false;
+	                }
+	
+	            } else {
+	
+	                if (!trimmedToken.matches("^[a-zA-Z][_$a-zA-Z0-9]*+")) {
+	                    System.out.println(1);
+	                    return false;
+	                }  else if (trimmedToken.startsWith("[") && !trimmedToken.endsWith("]")) {
+	                    System.out.println(2);
+	                    return false;
+	                } else if (!trimmedToken.startsWith("[") && trimmedToken.endsWith("]")) {
+	                    System.out.println(3);
+	                    return false;
+	                }  else if (trimmedToken.contains(" ")) {
+	                    System.out.println(4);
+	                    return false;
+	                }  else if (Character.isDigit(trimmedToken.charAt(0))) {
+	                    System.out.println(6);
+	                    return false;
+	                }  else if (reserved.contains(trimmedToken.toUpperCase())) {
+	                    System.out.println(8);
+	                    return false;
+	                }
+	
+	            }
+	        }
+	        return true;
         }
-        return true;
     }
 
     public static boolean isValidString(String stringExpression) {
@@ -593,7 +594,19 @@ public class ExpressionHelper {
     }
 
     public static String standardize(String basicExpression) {
-        return null;
+    	StringTokenizer tokenizer = new StringTokenizer(basicExpression, ")-+*/%(.", true);
+    	StringBuilder sb = new StringBuilder();
+    	while (tokenizer.hasMoreTokens()) {
+    		String token = tokenizer.nextToken().trim();
+    		if (isValidVariable(token)) {
+    			if (!(token.startsWith("[") && token.endsWith("]"))) {
+    				token = "[" + token + "]";
+    			}
+    			token = token.toUpperCase();
+    		}
+    		sb.append(token);
+    	}
+        return sb.toString();
     }
 
     public static boolean isValidBasicExpression(String basicExpression) {
@@ -617,10 +630,7 @@ public class ExpressionHelper {
     }
 
     public static void main(String[] args) {
-        String[] rs = parseSingle("(1.1 + 5.32 * 7.56) + 1.2 * varName + (varName2 % 5)");
-        for (int i = 0; i < rs.length; i++) {
-        	System.out.println(rs[i]);
-        }
+
     }
 
 }
