@@ -9,7 +9,6 @@ public class ExpressionHelper {
     private static HashSet<String> reserved;
     public static List<String> validComparatorList = Arrays.asList("=", ">", "<", ">=", "<=", "!=", "<>");
 
-
     public static void initializeReservedHashSet() {
         reserved = new HashSet<String>();
         reserved.add("ADD");
@@ -474,7 +473,7 @@ public class ExpressionHelper {
     }
 
     public static boolean isValidNumber(String numberExpression) {
-        return numberExpression.matches("-?\\d+(\\.\\d+)?");
+        return numberExpression.trim().matches("-?\\d+(\\.\\d+)?");
     }
 
     public static boolean isValidVariable(String variableExpression) {
@@ -573,7 +572,7 @@ public class ExpressionHelper {
     	boolean appending = false;
     	
         while (tokenizer.hasMoreTokens()) {
-        	String token = tokenizer.nextToken();
+        	String token = tokenizer.nextToken().trim();
         	if (token.trim().equals("(")) {
         		sb.append(token);
         		appending = true;
@@ -610,7 +609,63 @@ public class ExpressionHelper {
     }
 
     public static boolean isValidBasicExpression(String basicExpression) {
-        return true;
+    	
+    	/* Indicator Variables */
+    	boolean hasNumber = false;
+    	boolean hasString = false;
+    	boolean hasVariable = false;
+    	boolean hasNull = false;
+    	boolean hasOtherOp = false;
+    	boolean isOp = false;
+    	boolean hasConsecutiveOps = false;
+    	String op1 = "";
+    	String op2 = "";
+    	
+    	String[] components = parseSingle(basicExpression);
+    	
+    	for (int i = 0; i < components.length; i++) {
+    		if (isValidNumber(components[i])) {
+    			hasNumber = true;
+    		} else if (isValidString(components[i])) {
+    			hasString = true;
+    		} else if (isValidVariable(components[i])) {
+    			hasVariable = true;
+    		} else if (isValidNull(components[i])) {
+    			hasNull = true;
+    		} else if (components[i].matches("-|\\+|\\*|/|%|&")) {
+    			
+    			if (isOp) {
+    				hasConsecutiveOps = true;
+    				op2 = op1 + components[i];
+    			} else {
+    				isOp = true;
+    				op1 = components[i];
+    			}
+    			
+    			if (components[i].matches("-||\\*|/|%|&")) {
+    				hasOtherOp = true;
+    			}
+    			
+    		} else {
+    			isOp = false;
+    		}
+    	}
+
+    	if (hasNumber && hasString) {
+    		System.out.println("num & string");
+    		return false;
+    	} else if (hasNull && (hasString || hasVariable || hasNumber)) {
+    		System.out.println("null & smth else");
+    		return false;
+    	} else if (hasString) {
+    		System.out.println("string only +");
+    		return !hasOtherOp;
+    	} else if (hasConsecutiveOps) {
+    		System.out.println("consecutive only +-");
+    		return op2.equals("+-");
+    	} else {
+    		return true;
+    	}
     }
 
     public static String simplify(String basicExpession) {
@@ -630,7 +685,9 @@ public class ExpressionHelper {
     }
 
     public static void main(String[] args) {
-
+    	//System.out.println(standardize("1.2 * varName . hasSpaceBeforeAndAfterDot . [already has bracket] *    -88 + 'hello! Leave the spaces and CaPiTaLiSaTiOn alone!'"));
+    	System.out.println(isValidBasicExpression("nuLl"));
+    	System.out.println(isValidNull("nuLl"));
     }
 
 }
