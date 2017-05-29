@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.lang.model.element.VariableElement;
+
+import javafx.beans.property.StringProperty;
+
 public class ExpressionHelper {
     private static HashSet<String> reserved;
     public static List<String> validComparatorList = Arrays.asList("=", ">", "<", ">=", "<=", "!=", "<>");
@@ -566,13 +570,22 @@ public class ExpressionHelper {
 //    		}
 //    	}
     	
-    	StringTokenizer tokenizer = new StringTokenizer(expression, ")-+*/%(", true);
+    	StringTokenizer tokenizer = new StringTokenizer(expression, ")-+*/%&|(", true);
     	ArrayList<String> result = new ArrayList<String>();
     	StringBuilder sb = new StringBuilder();
     	boolean appending = false;
+    	boolean isOp = false;
+    	boolean isNeg = false;
     	
         while (tokenizer.hasMoreTokens()) {
-        	String token = tokenizer.nextToken().trim();
+        	String token;
+        	if (isNeg) {
+        		token = "-" + tokenizer.nextToken().trim();
+        		isNeg = false;
+        	} else {
+        		token = tokenizer.nextToken().trim();
+        	}
+        	
         	if (token.trim().equals("(")) {
         		sb.append(token);
         		appending = true;
@@ -585,7 +598,16 @@ public class ExpressionHelper {
         		if (appending) {
         			sb.append(token);
         		} else {
-        			result.add(token);
+        			if (token.equals("-") && isOp) {
+                		isOp = false;
+                		isNeg = true;
+                	} else if (token.matches("-|\\+|\\*|/|%|&|\\|")) {
+                		isOp = true;
+                		result.add(token);
+                	} else {
+                		isOp = false;
+                		result.add(token);
+                	}
         		}
         	}
         }
@@ -632,7 +654,7 @@ public class ExpressionHelper {
     			hasVariable = true;
     		} else if (isValidNull(components[i])) {
     			hasNull = true;
-    		} else if (components[i].matches("-|\\+|\\*|/|%|&")) {
+    		} else if (components[i].matches("-|\\+|\\*|/|%|&|\\|")) {
     			
     			if (isOp) {
     				hasConsecutiveOps = true;
@@ -642,7 +664,7 @@ public class ExpressionHelper {
     				op1 = components[i];
     			}
     			
-    			if (components[i].matches("-||\\*|/|%|&")) {
+    			if (components[i].matches("-||\\*|/|%|&|\\|")) {
     				hasOtherOp = true;
     			}
     			
@@ -669,7 +691,67 @@ public class ExpressionHelper {
     }
 
     public static String simplify(String basicExpession) {
+        String[] components = parseSingle(basicExpession);
+        ArrayList<String> altered = new ArrayList<String>();
+         
+        for (int i = 0; i < components.length; i++) {
+        	if (components[i].matches("\\*|/|%")) {
+        		altered.remove(altered.size()-1);
+        		StringBuilder sb = new StringBuilder();
+        		MultDivMod mdm = new MultDivMod(components[i-1], components[i]);
+        		sb.append(components[i-1]);
+        		sb.append(components[i]);
+        		
+        		if (i+2 >= components.length) {
+        			mdm.append(components[i+1]);
+        			i++;
+        		} else {
+	        		while (components[i+2].matches("\\*|/|%")) {
+	        			mdm.append(components[i+1]);
+	        			mdm.append(components[i+2]);
+	        			i += 2;
+	        			
+	        			if (i+2 >= components.length) {
+	        				mdm.append(components[i+1]);
+	    	        		i++;
+	    	        		break;
+	        			}
+	        		}
+	        		if (i+2 < components.length) {
+	        			mdm.append(components[i+1]);
+	        		}
+        		}
+        		altered.add(mdm.evaluateFinal());
+        	} else {
+        		altered.add(components[i]);
+        	}
+        }
+        
+        for (int i = 0; i < altered.size(); i++) {
+        	System.out.println(altered.get(i));
+        }
         return "";
+        
+    }
+    
+    public static String basicOp(String a, String op, String b) {
+    	if (isValidNumber(a) && isValidNumber(b)) {
+    		if (op.equals("+")) {
+    			Float result = Float.parseFloat(a) + Float.parseFloat(b);
+    			return result.toString();
+    		} else if (op.equals("-")) {
+    			Float result = Float.parseFloat(a) - Float.parseFloat(b);
+    			return result.toString();
+    		} else if (op.equals("*")) {
+    			Float result = Float.parseFloat(a) * Float.parseFloat(b);
+    			return result.toString();
+    		} else if (op.equals("/")) {
+    			Float result = Float.parseFloat(a) / Float.parseFloat(b);
+    			return result.toString();
+    		}
+    		
+    	}
+    	return "";
     }
 
     public static String evaluate(String expression) {
@@ -686,8 +768,11 @@ public class ExpressionHelper {
 
     public static void main(String[] args) {
     	//System.out.println(standardize("1.2 * varName . hasSpaceBeforeAndAfterDot . [already has bracket] *    -88 + 'hello! Leave the spaces and CaPiTaLiSaTiOn alone!'"));
-    	System.out.println(isValidBasicExpression("nuLl"));
-    	System.out.println(isValidNull("nuLl"));
+    	System.out.println(simplify("5+4-3*-x/1+2*2"));
+//    	String[] a = parseSingle("5+4-3*-2/1");
+//    	for (int i = 0; i < a.length; i++) {
+//    		System.out.println(a[i]);
+//    	}
     }
 
 }
