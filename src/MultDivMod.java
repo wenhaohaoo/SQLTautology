@@ -90,14 +90,13 @@ public class MultDivMod {
 			int val = varVals.next();
 			if (val > 0) {
 				for (int i = 0; i < val; i++) {
-					sb.append(key);
 					sb.append("*");
+					sb.append(key);
 				}
 			} else  if (val < 0){
-				sb.append("/");
 				for (int i = 0; i > val; i--) {
-					sb.append(key);
 					sb.append("/");
+					sb.append(key);
 				}
 			} else {
 				sb.append("");
@@ -107,8 +106,8 @@ public class MultDivMod {
 		if (sb.length() == 0) {
 			return "";
 		}
-		
-		String var = sb.substring(0, sb.length()-1).toString();
+
+		String var = sb.toString();
 		
 		if (forMod) {		
 			if (var.startsWith("/")) {
@@ -129,23 +128,19 @@ public class MultDivMod {
 		String var = evaluateVar(null, false);
 		if (this.val == 1) {
 			if (var.equals("")) {
-				this.result = "1";
+				this.result = "1.0";
 			} else {
 				if (var.startsWith("/")) {
-					this.result = "1" + var;
+					this.result = "1.0" + var;
 				} else {
-					this.result = var;
+					this.result = var.substring(1);
 				}
 			}
 		} else {
 			if (var.equals("")) {
 				this.result = this.val.toString();
 			} else {
-				if (var.startsWith("/")) {
-					this.result = this.val + var;
-				} else {
-					this.result = this.val + "*" + var;
-				}
+				this.result = this.val + var;
 			}
 		}
 		
@@ -157,16 +152,11 @@ public class MultDivMod {
 	}
 	
 	public static void main(String[] args) {
-		MultDivMod multDivMod = new MultDivMod("2", "*");
-		multDivMod.append("-x");
-		multDivMod.append("*");
+		MultDivMod multDivMod = new MultDivMod("3", "*");
 		multDivMod.append("x");
-		multDivMod.append("*");
-		multDivMod.append("y");
-		multDivMod.append("*");
-		multDivMod.append("-5");
+		multDivMod.append("%");
+		multDivMod.append("3");
 		multDivMod.evaluateFinal();
-		System.out.println();
 	}
  	
 }

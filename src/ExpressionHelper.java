@@ -506,7 +506,7 @@ public class ExpressionHelper {
 	            } else {
 	
 	                if (!trimmedToken.matches("^[a-zA-Z][_$a-zA-Z0-9]*+")) {
-	                    System.out.println(1);
+	                    //System.out.println(1);
 	                    return false;
 	                }  else if (trimmedToken.startsWith("[") && !trimmedToken.endsWith("]")) {
 	                    System.out.println(2);
@@ -693,6 +693,7 @@ public class ExpressionHelper {
     public static String simplify(String basicExpession) {
         String[] components = parseSingle(basicExpession);
         ArrayList<String> altered = new ArrayList<String>();
+        boolean hasString = false;
          
         for (int i = 0; i < components.length; i++) {
         	if (components[i].matches("\\*|/|%")) {
@@ -719,18 +720,23 @@ public class ExpressionHelper {
 	        		}
 	        		if (i+2 < components.length) {
 	        			mdm.append(components[i+1]);
+	        			i++;
 	        		}
         		}
         		altered.add(mdm.evaluateFinal());
         	} else {
         		altered.add(components[i]);
+        		if (isValidString(components[i])) {
+        			hasString = true;
+        		}
         	}
         }
         
-        for (int i = 0; i < altered.size(); i++) {
-        	System.out.println(altered.get(i));
+        AddSubBit addSubBit = new AddSubBit(altered.get(0), hasString);
+        for (int i = 1; i < altered.size(); i++) {
+        	addSubBit.append(altered.get(i));
         }
-        return "";
+        return addSubBit.evaluateFinal();
         
     }
     
@@ -768,7 +774,16 @@ public class ExpressionHelper {
 
     public static void main(String[] args) {
     	//System.out.println(standardize("1.2 * varName . hasSpaceBeforeAndAfterDot . [already has bracket] *    -88 + 'hello! Leave the spaces and CaPiTaLiSaTiOn alone!'"));
-    	System.out.println(simplify("5+4-3*-x/1+2*2"));
+    	System.out.println(simplify("5+8*3"));
+    	System.out.println(simplify("5+8*varName+varName+2"));
+    	System.out.println(simplify("5+8*varName*varName-7"));
+    	System.out.println(simplify("5+8*varName*varName/varName-5*varName+0-0"));
+    	System.out.println(simplify("5+8*varName*varName/varName/varName"));
+    	System.out.println(simplify("5+8*varName*varName/varName/varName/varName"));
+    	System.out.println(simplify("'he'+'llo'+varName"));
+    	System.out.println(simplify("'he'+varName+'llo'"));
+    	System.out.println(simplify("'he'+''+'llo'"));
+    	System.out.println(simplify("1/x+2/x+3/y+4/y+x/y+3*x%3"));
 //    	String[] a = parseSingle("5+4-3*-2/1");
 //    	for (int i = 0; i < a.length; i++) {
 //    		System.out.println(a[i]);
