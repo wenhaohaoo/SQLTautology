@@ -110,12 +110,7 @@ public class MultDivMod {
 		String var = sb.toString();
 		
 		if (forMod) {		
-			if (var.startsWith("/")) {
-				var = this.val + var;
-			} else {
-				var = this.val + "*" + var;
-			}
-			
+			var = this.val + var;
 			var = "(" + var + op + num + ")";
 			this.val = (float) 1.0;			
 			return var;
@@ -147,15 +142,12 @@ public class MultDivMod {
 		if (isNeg) {
 			this.result = "-" + this.result;
 		}
-		System.out.println(this.result);
 		return this.result;
 	}
 	
 	public static void main(String[] args) {
 		MultDivMod multDivMod = new MultDivMod("3", "*");
 		multDivMod.append("x");
-		multDivMod.append("%");
-		multDivMod.append("3");
 		multDivMod.evaluateFinal();
 	}
  	
