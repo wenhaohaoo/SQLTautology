@@ -1,20 +1,27 @@
 import java.io.*;
+import java.util.HashMap;
 
-public class JavaRunCommand {
-
-    public static void main(String args[]) {
-
+public class SympySolver {
+	
+	HashMap<String, String> hashMap = new HashMap<String, String>();
+	
+	public SympySolver(String[] expression) {
+		
+	}
+	
+	
+	
+	public String solve() {
+		
         String s = null;
+        String result = "";
 
         try {
             
-        	String[] cmd = {"python -V"};
         	// run the Unix "ps -ef" command
             // using the Runtime exec method:
             
             FileWriter fileWriter = new FileWriter(new File("temp.py"));
-            
-//            fileWrite.write("which python");
             
             fileWriter.write("from sympy import *\n");
             fileWriter.write("x = Symbol('x')\n");
@@ -33,6 +40,7 @@ public class JavaRunCommand {
             // read the output from the command
             System.out.println("Here is the standard output of the command:\n");
             while ((s = stdInput.readLine()) != null) {
+            	result = s;
                 System.out.println(s);
             }
             
@@ -42,12 +50,16 @@ public class JavaRunCommand {
                 System.out.println(s);
             }
             
-            System.exit(0);
+            p.destroy();
+            
         }
         catch (IOException e) {
             System.out.println("exception happened - here's what I know: ");
             e.printStackTrace();
             System.exit(-1);
         }
-    }
+        
+        return result;
+	}
+
 }
