@@ -24,14 +24,20 @@ public class SympySolver {
         String[] parser = ExpressionHelper.parseSingle(expression);
         StringBuilder convertVarToSymbol = new StringBuilder();
         StringBuilder declareVar = new StringBuilder();
+        StringBuilder modifiedExpression = new StringBuilder();
         String var = "x";
         int counter = 1;
 
         for(int i=0; i<parser.length; i++) {
-            if(ExpressionHelper.isValidVariable(parser[i])) {
-                hashMap.put(var + counter, parser[i]);
+            if(ExpressionHelper.isValidVariable(parser[i]) && hashMap.containsKey(parser[i])) {
+                modifiedExpression.append(hashMap.get(parser[i]));
+            } else if(ExpressionHelper.isValidVariable(parser[i])) {
+                hashMap.put(parser[i], var + counter);
                 declareVar.append(var + counter + ",");
                 convertVarToSymbol.append(var + counter + " ");
+                modifiedExpression.append(var + counter++);
+            } else {
+                modifiedExpression.append(parser[i]);
             }
         }
 
@@ -41,7 +47,7 @@ public class SympySolver {
 
         script.add(IMPORT_LIBRARY);
         script.add(String.format(INIT_SYMBOL, declareVar.toString(), convertVarToSymbol.toString()));
-        script.add(String.format(PRINT_FUNCTION, expression));
+        script.add(String.format(PRINT_FUNCTION, modifiedExpression));
         for(String s: script) {
             System.out.println(s);
         }
@@ -112,7 +118,7 @@ public class SympySolver {
 
     public static void main(String[] args) {
         SympySolver sympySolver = new SympySolver();
-        solve("x|4");
+        solve("x + (x+3) + 3");
     }
 
 }
