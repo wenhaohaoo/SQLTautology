@@ -8,13 +8,14 @@ import java.util.HashMap;
 
 public class SympySolver {
 
-    private HashMap<String, String> hashMap;
+    private static HashMap<String, String> hashMap;
 
     public SympySolver() {
         hashMap = new HashMap<String, String>();
     }
 
-    private String[] preProcess(String expression) {
+
+    private static String[] preProcess(String expression) {
         final String IMPORT_LIBRARY = "from sympy import *\n";
         final String INIT_SYMBOL = "%1$ssymbols(%2$s)\n";
         final String PRINT_FUNCTION = "print(factor(simplify(%1$s)))\n";
@@ -47,7 +48,8 @@ public class SympySolver {
         return script.toArray(new String[script.size()]);
     }
 
-    private String connectToPython(String[] script) {
+    private static String connectToPython(String[] script) {
+
         String s = null;
         String result = "";
 
@@ -58,11 +60,12 @@ public class SympySolver {
 
             FileWriter fileWriter = new FileWriter(new File("temp.py"));
 
-            fileWriter.write("from sympy import *\n");
-            fileWriter.write("x = Symbol('x')\n");
-            fileWriter.write("print(simplify(x|4))\n");
+            for (int i = 0; i < script.length; i++) {
+                fileWriter.write(script[i]);
+            }
             fileWriter.flush();
             fileWriter.close();
+
 
             Process p = Runtime.getRuntime().exec("python temp.py");
 
@@ -97,19 +100,19 @@ public class SympySolver {
         return result;
     }
 
-    private String postProcess(String expression) {
-
+    private static String postProcess(String expression) {
+        return "";
     }
 
-    public String solve(String expression) {
-        String[] sympyString = this.preProcess(expression);
-        String result = connectToPython(sympyString);
-        return "";
+    public static String solve(String expression) {
+        String[] sympyString = preProcess(expression);
+        String result = connectToPython(new String[10]);
+        return postProcess(result);
     }
 
     public static void main(String[] args) {
         SympySolver sympySolver = new SympySolver();
-        sympySolver.solve("x|4");
+        solve("x|4");
     }
 
 }
