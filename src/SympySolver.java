@@ -3,16 +3,17 @@ import java.util.HashMap;
 
 public class SympySolver {
 	
-	HashMap<String, String> hashMap = new HashMap<String, String>();
+	private HashMap<String, String> hashMap;
 	
-	public SympySolver(String[] expression) {
+	public SympySolver() {
+		hashMap = new HashMap<String, String>();
+	}
+	
+	private String[] preProcess(String expression) {
 		
 	}
 	
-	
-	
-	public String solve() {
-		
+	private String connectToPython(String[] script) {
         String s = null;
         String result = "";
 
@@ -23,7 +24,7 @@ public class SympySolver {
             
             FileWriter fileWriter = new FileWriter(new File("temp.py"));
             
-            fileWriter.write("from sympy import *\n");
+            fileWriter.write("from symp;y import *\n");
             fileWriter.write("x = Symbol('x')\n");
             fileWriter.write("print(simplify(x|4))\n");
             fileWriter.flush();
@@ -60,6 +61,16 @@ public class SympySolver {
         }
         
         return result;
+	}
+	
+	private String postProcess(String expression) {
+		
+	}
+	
+	public String solve(String expression) {
+		String[] sympyString = this.preProcess(expression);
+		String result = connectToPython(sympyString);
+		return postProcess(result);
 	}
 
 }
