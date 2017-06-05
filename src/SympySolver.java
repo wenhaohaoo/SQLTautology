@@ -13,7 +13,7 @@ public class SympySolver {
 		
 	}
 	
-	private String connectToPython(String[] script) {
+	private static String connectToPython(String[] script) {
         String s = null;
         String result = "";
 
@@ -24,9 +24,15 @@ public class SympySolver {
             
             FileWriter fileWriter = new FileWriter(new File("temp.py"));
             
-            fileWriter.write("from symp;y import *\n");
+//            for (int i = 0; i < script.length; i++) {
+//            	fileWriter.write(script[i]);
+//            }
+//            fileWriter.flush();
+//            fileWriter.close();
+            
+            fileWriter.write("from sympy import *\n");
             fileWriter.write("x = Symbol('x')\n");
-            fileWriter.write("print(simplify(x|4))\n");
+            fileWriter.write("print(simplify(x+(x+3)+3))\n");
             fileWriter.flush();
             fileWriter.close();
             
@@ -42,7 +48,7 @@ public class SympySolver {
             System.out.println("Here is the standard output of the command:\n");
             while ((s = stdInput.readLine()) != null) {
             	result = s;
-                System.out.println(s);
+                System.out.println(s+2);
             }
             
             // read any errors from the attempted command
@@ -67,10 +73,15 @@ public class SympySolver {
 		
 	}
 	
-	public String solve(String expression) {
-		String[] sympyString = this.preProcess(expression);
-		String result = connectToPython(sympyString);
-		return postProcess(result);
+	public static String solve(String expression) {
+		//String[] sympyString = this.preProcess(expression);
+		String result = connectToPython(new String[10]);
+		return "";
+	}
+	
+	public static void main(String[] args) {
+		SympySolver ss = new SympySolver();
+		ss.solve("");
 	}
 
 }
