@@ -4,8 +4,8 @@ import java.util.Iterator;
 public class AddSubBit {
 
 	private Float val = (float) 0;
-	private String str;
 	private String op;
+	private String str = "";
 	private String result = "";
 	private HashMap<String, Float> varList;
 	private HashMap<String, AddSubBit> varListNumerator;
@@ -23,34 +23,45 @@ public class AddSubBit {
 		if (ExpressionHelper.isValidNumber(x)) {
 			prevTerm = Term.NUMBER;
 			val = Float.parseFloat(x);
-		} else if (ExpressionHelper.isValidVariable(x)) {
-			prevTerm = Term.VAR;
-			varList.put(x, (float) 1);
 		} else if (ExpressionHelper.isValidString(x)) {
 			prevTerm = Term.STRING;
 			str = x;
 		} else {
 			prevTerm = Term.VAR;
-			if (x.contains("*")) {
-				int index = x.indexOf("*");
-				if (ExpressionHelper.isValidNumber(x.substring(0, index))
-						&& ExpressionHelper.isValidVariable(x.substring(index + 1))) {
-					varList.put((x.substring(index + 1)), Float.parseFloat(x.substring(0, index)));
-				}
-			} else if (x.contains("/") && !x.contains("%")) {
-				int index = x.indexOf("/");
-				String var = x.substring(index);
-				String coeff = x.substring(0, index);
-
-				if (varList.containsKey(var)) {
-					varListNumerator.get(var).append(op);
-					varListNumerator.get(var).append(coeff);
-				} else {
-					varList.put(var, (float) 1);
-					varListNumerator.put(var, new AddSubBit(coeff, false));
-				}
+			if (hasString) {
+				result = x;
 			} else {
-				varList.put(x, (float) 1);
+				if (x.contains("*") && !x.contains("/")) {
+					int index = x.indexOf("*");
+					if (ExpressionHelper.isValidNumber(x.substring(0, index))
+							&& ExpressionHelper.isValidVariable(x.substring(index + 1))) {
+						varList.put((x.substring(index + 1)), Float.parseFloat(x.substring(0, index)));
+					} else {
+						varList.put(x, (float) 1);
+					}
+//				} else if (x.contains("/") && !x.contains("%")) {
+//					int index = x.indexOf("/");
+//					String var = x.substring(index);
+//					String coeff = x.substring(0, index);
+//					
+//					if (coeff.contains("*")) {
+//						index = coeff.indexOf("*");
+//						if (ExpressionHelper.isValidNumber(coeff.substring(0, index))
+//								&& ExpressionHelper.isValidVariable(coeff.substring(index + 1))) {
+//							varList.put(var, (float) 1);
+//							varListNumerator.put(var, new AddSubBit("0", false));
+//							for (int i = 0; i < Float.parseFloat(coeff.substring(0, index)); i++) {
+//								varListNumerator.get(var).append("+");
+//								varListNumerator.get(var).append(coeff.substring(index + 1));
+//							}
+//						}
+//					} else {
+//						varList.put(var, (float) 1);
+//						varListNumerator.put(var, new AddSubBit(coeff, false));
+//					}
+				} else {
+					varList.put(x, (float) 1);
+				}
 			}
 		}
 	}
@@ -87,7 +98,7 @@ public class AddSubBit {
 				// do nothing
 			} else {
 				
-				if (nextToken.contains("*")) {
+				if (nextToken.contains("*") && !nextToken.contains("/")) {
 					int index = nextToken.indexOf("*");
 					String var = nextToken.substring(index + 1);
 					String coeff = nextToken.substring(0, index);
@@ -139,18 +150,43 @@ public class AddSubBit {
 						}
 					}
 					
-				} else if (nextToken.contains("/") && !nextToken.contains("%")) {
-					int index = nextToken.indexOf("/");
-					String var = nextToken.substring(index);
-					String coeff = nextToken.substring(0, index);
-
-					if (varList.containsKey(var)) {
-						varListNumerator.get(var).append(op);
-						varListNumerator.get(var).append(coeff);
-					} else {
-						varList.put(var, (float) 1);
-						varListNumerator.put(var, new AddSubBit(coeff, false));
-					}
+//				} else if (nextToken.contains("/") && !nextToken.contains("%")) {
+//					int index = nextToken.indexOf("/");
+//					String var = nextToken.substring(index);
+//					String coeff = nextToken.substring(0, index);
+//
+//					if (coeff.contains("*")) {
+//						index = coeff.indexOf("*");
+//						String subVar = coeff.substring(index + 1);
+//						String subCoeff = coeff.substring(0, index);
+//						
+//						if (ExpressionHelper.isValidNumber(subCoeff) && ExpressionHelper.isValidVariable(subVar)) {
+//							
+//							if (varList.containsKey(var)) {
+//								for (int i = 0; i < Float.parseFloat(subCoeff); i++) {
+//									if (op.equals("+")) {
+//										varListNumerator.get(var).append("+");
+//									} else {
+//										varListNumerator.get(var).append("-");
+//									}
+//									varListNumerator.get(var).append(subVar);
+//									//System.out.println(varListNumerator.get(var).evaluateFinal());
+//								}
+//							} else {
+//								varList.put(var, (float) 1);
+//								varListNumerator.put(var, new AddSubBit(coeff, false));
+//							}
+//							
+//						}
+//					} else {
+//						if (varList.containsKey(var)) {
+//							varListNumerator.get(var).append(op);
+//							varListNumerator.get(var).append(coeff);
+//						} else {
+//							varList.put(var, (float) 1);
+//							varListNumerator.put(var, new AddSubBit(coeff, false));
+//						}
+//					}
 
 				} else {
 					
@@ -215,7 +251,7 @@ public class AddSubBit {
 			} else if (current == null) {
 				// do nothing
 			} else {
-				if (nextToken.contains("*")) {
+				if (nextToken.contains("*") && !nextToken.contains("/")) {
 					int index = nextToken.indexOf("*");
 					String var = nextToken.substring(index + 1);
 					String coeff = nextToken.substring(0, index);
@@ -265,18 +301,41 @@ public class AddSubBit {
 							}
 						}
 					}
-				} else if (nextToken.contains("/") && !nextToken.contains("%")) {
-					int index = nextToken.indexOf("/");
-					String var = nextToken.substring(index);
-					String coeff = nextToken.substring(0, index);
-
-					if (varList.containsKey(var)) {
-						varListNumerator.get(var).append(op);
-						varListNumerator.get(var).append(coeff);
-					} else {
-						varList.put(var, (float) 1);
-						varListNumerator.put(var, new AddSubBit(coeff, false));
-					}
+//				} else if (nextToken.contains("/") && !nextToken.contains("%")) {
+//					int index = nextToken.indexOf("/");
+//					String var = nextToken.substring(index);
+//					String coeff = nextToken.substring(0, index);
+//					
+//					if (coeff.contains("*")) {
+//						index = coeff.indexOf("*");
+//						String subVar = coeff.substring(index + 1);
+//						String subCoeff = coeff.substring(0, index);
+//						if (ExpressionHelper.isValidNumber(subCoeff) && ExpressionHelper.isValidVariable(subVar)) {
+//							
+//							if (varList.containsKey(var)) {
+//								for (int i = 0; i < Float.parseFloat(subCoeff); i++) {
+//									if (op.equals("+")) {
+//										varListNumerator.get(var).append("+");
+//									} else {
+//										varListNumerator.get(var).append("-");
+//									}
+//									varListNumerator.get(var).append(subVar);
+//								}
+//							} else {
+//								varList.put(var, (float) 1);
+//								varListNumerator.put(var, new AddSubBit(coeff, false));
+//							}
+//							
+//						}
+//					} else {
+//						if (varList.containsKey(var)) {
+//							varListNumerator.get(var).append(op);
+//							varListNumerator.get(var).append(coeff);
+//						} else {
+//							varList.put(var, (float) 1);
+//							varListNumerator.put(var, new AddSubBit(coeff, false));
+//						}
+//					}
 				} else {
 					if (varList.containsKey(nextToken)) {
 						if (this.op.equals("+")) {
@@ -321,19 +380,21 @@ public class AddSubBit {
 			if (val == 0) {
 				// do nothing
 			} else if (val == 1) {
-				if (key.startsWith("/")) {
-					String numerator = varListNumerator.get(key).evaluateFinal();
-					if (ExpressionHelper.isValidNumber(numerator) || ExpressionHelper.isValidVariable(numerator)) {
-						sb.append(numerator);
-					} else {
-						sb.append("("+ numerator + ")");
-					}
+//				if (key.startsWith("/")) {
+//					String numerator = varListNumerator.get(key).evaluateFinal();
+//					if (!numerator.equals("0.0")) {
+//						if (ExpressionHelper.isValidNumber(numerator) || ExpressionHelper.isValidVariable(numerator)) {
+//							sb.append(numerator);
+//						} else {
+//							sb.append("{"+ numerator + "}");
+//						}
+//						sb.append(key);
+//						sb.append("+");
+//					}
+//				} else {
 					sb.append(key);
 					sb.append("+");
-				} else {
-					sb.append(key);
-					sb.append("+");
-				}
+//				}
 			} else if (val == -1) {
 				sb.append("-" + key);
 				sb.append("+");
@@ -353,7 +414,7 @@ public class AddSubBit {
 	public String evaluateFinal() {
 		if (isStrOp) {
 			this.result += this.str;
-			// System.out.println(this.result);
+			//System.out.println(this.result);
 			return this.result;
 		} else {
 			String var = evaluateVar();
@@ -374,9 +435,12 @@ public class AddSubBit {
 
 	public static void main(String[] args) {
 		// "5+8*varName+varName+2";
-		AddSubBit addSubBit = new AddSubBit("5", false);
+		// "x/y+3/y"
+		AddSubBit addSubBit = new AddSubBit("0", false);
 		addSubBit.append("+");
-		addSubBit.append("8*x*x");
+		addSubBit.append("4.0*x");
+		addSubBit.append("+");
+		addSubBit.append("4.0*x");
 		addSubBit.evaluateFinal();
 	}
 }

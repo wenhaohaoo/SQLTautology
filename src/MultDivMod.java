@@ -108,11 +108,15 @@ public class MultDivMod {
 		}
 
 		String var = sb.toString();
-		
-		if (forMod) {		
-			var = this.val + var;
-			var = "(" + var + op + num + ")";
+		if (forMod && var.startsWith("*")) {
+			var = (this.val == 1)? var.substring(1) : (this.val + var);
+			var = (this.val % (float) num == 0)? "0" : "{" + var + op + num + "}";
 			this.val = (float) 1.0;			
+			return var;
+		} else if (forMod) {
+			var = (this.val == 1)? var.substring(1) : (this.val + var);
+			var = "{" + var + op + num + "}";
+			this.val = (float) 1.0;	
 			return var;
 		} else {
 			return var;
@@ -142,13 +146,38 @@ public class MultDivMod {
 		if (isNeg) {
 			this.result = "-" + this.result;
 		}
+		//System.out.println(result);
 		return this.result;
 	}
 	
 	public static void main(String[] args) {
-		MultDivMod multDivMod = new MultDivMod("3", "*");
-		multDivMod.append("x");
+		//System.out.println(simplify("5+8*varName+varName+2+VARNAME"));
+		MultDivMod multDivMod = new MultDivMod("6", "/");
+		multDivMod.append("yasd");
+		multDivMod.append("%");
+		multDivMod.append("2");
 		multDivMod.evaluateFinal();
+		
+		MultDivMod multDivMod2 = new MultDivMod("yasd", "%");
+		multDivMod2.append("2");
+		multDivMod2.evaluateFinal();
+		
+		MultDivMod multDivMod3 = new MultDivMod("yasd", "%");
+		multDivMod3.append("1");
+		multDivMod3.evaluateFinal();
+		
+		MultDivMod multDivMod4 = new MultDivMod("y", "%");
+		multDivMod4.append("1");
+		multDivMod4.evaluateFinal();
+		
+		MultDivMod multDivMod5 = new MultDivMod("8", "*");
+		multDivMod5.append("yasd");
+		multDivMod5.evaluateFinal();
+		
+		MultDivMod multDivMod6 = new MultDivMod("", "*");
+		multDivMod6.append("-3");
+		multDivMod6.evaluateFinal();
+		
 	}
  	
 }
