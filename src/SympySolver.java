@@ -9,9 +9,11 @@ import java.util.HashMap;
 public class SympySolver {
 
     private static HashMap<String, String> hashMap;
+    private static HashMap<String, String> reversedMap;
 
     public SympySolver() {
         hashMap = new HashMap<String, String>();
+        reversedMap = new HashMap<String, String>();
     }
 
 
@@ -33,6 +35,7 @@ public class SympySolver {
                 modifiedExpression.append(hashMap.get(parser[i]));
             } else if(ExpressionHelper.isValidVariable(parser[i])) {
                 hashMap.put(parser[i], var + counter);
+                reversedMap.put(var + counter, parser[i]);
                 declareVar.append(var + counter + ",");
                 convertVarToSymbol.append(var + counter + " ");
                 modifiedExpression.append(var + counter++);
@@ -48,9 +51,7 @@ public class SympySolver {
         script.add(IMPORT_LIBRARY);
         script.add(String.format(INIT_SYMBOL, declareVar.toString(), convertVarToSymbol.toString()));
         script.add(String.format(PRINT_FUNCTION, modifiedExpression));
-        for(String s: script) {
-            System.out.println(s);
-        }
+
         return script.toArray(new String[script.size()]);
     }
 
@@ -61,12 +62,10 @@ public class SympySolver {
 
         try {
 
-            // run the Unix "ps -ef" command
-            // using the Runtime exec method:
-
             FileWriter fileWriter = new FileWriter(new File("temp.py"));
 
             for (int i = 0; i < script.length; i++) {
+            	System.out.println(script[i]);
                 fileWriter.write(script[i]);
             }
             fileWriter.flush();
@@ -107,18 +106,37 @@ public class SympySolver {
     }
 
     private static String postProcess(String expression) {
-        return "";
+        expression = expression.replace("**", "&");
+        String[] components = ExpressionHelper.parseSingle(expression);
+        StringBuilder sb = new StringBuilder();
+        String lastVar = "";
+        for (int i = 0; i < components.length; i++) {
+        	if (reversedMap.containsKey(components[i])) {
+        		components[i] = reversedMap.get(components[i]);
+        		lastVar = components[i];
+        		System.out.println(components[i]);
+        	} else if (components[i].equals("&")) {
+        		sb.replace(sb.length()-lastVar.length(), sb.length(), "");
+        		sb.substring(0, sb.length()-lastVar.length());
+        		sb.append("POWER(" + lastVar + ", " + components[i+1] + ")");
+        		i+=2;
+        	}
+        	sb.append(components[i]);
+        }
+        return sb.toString();
     }
 
     public static String solve(String expression) {
         String[] sympyString = preProcess(expression);
-        String result = connectToPython(new String[10]);
-        return postProcess(result);
+        String result = connectToPython(sympyString);
+        result = postProcess(result);
+        System.out.println("RESULT: " + result);
+        return result;
     }
 
     public static void main(String[] args) {
         SympySolver sympySolver = new SympySolver();
-        solve("x + (x+3) + 3");
+        solve("(x + (x+3) + 3) + y*y*y*y*y/y/x");
     }
 
 }
