@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExpressionHelper {
+
     private static HashSet<String> reserved;
     public static List<String> validComparatorList = Arrays.asList("=", ">", "<", ">=", "<=", "!=", "<>");
 
@@ -597,7 +598,7 @@ public class ExpressionHelper {
         //		}
         //		return result.toArray(new String[result.size()]);
 
-        StringTokenizer tokenizer = new StringTokenizer(expression, ")-+*/%&|(", true);
+        StringTokenizer tokenizer = new StringTokenizer(expression, ")-+*/%&|(,", true);
         ArrayList<String> result = new ArrayList<String>();
         StringBuilder sb = new StringBuilder();
 
@@ -738,47 +739,24 @@ public class ExpressionHelper {
 
     public static String evaluate(String expression) {
         String[] components = parseSingle(expression);
-        ArrayList<String> simplified = new ArrayList<String>();
         boolean hasString = false;
 
-        // for (int i = 0; i < components.length; i ++) {
-        // System.out.println(components[i]);
-        // }
-
         for (int i = 0; i < components.length; i++) {
-            String s = components[i];
-            if (s.startsWith("(") && s.endsWith(")")) {
-                String removedBrackets = s.substring(1, s.length() - 1);
-                if (removedBrackets.contains("(") && removedBrackets.contains(")")) {
-                    removedBrackets = evaluate(removedBrackets);
-                }
-                removedBrackets = simplify(removedBrackets);
-
-                // in cases where components[i] is the first term and i is 0;
-                if (i != 0) {
-                    if (components[i - 1].equals("*") || components[i - 1].equals("/")) {
-                        removedBrackets = "{" + removedBrackets + "}";
-                    }
-                }
-
-                if (!removedBrackets.contains("{")
-                        && (components[i + 1].equals("*") || components[i + 1].equals("/"))) {
-                    removedBrackets = "{" + removedBrackets + "}";
-                }
-
-                simplified.add(removedBrackets);
-
-            } else {
-                simplified.add(components[i]);
+            if (isValidString(components[i])) {
+                hasString = true;
             }
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < simplified.size(); i++) {
-            sb.append(simplified.get(i));
+        if (hasString) {
+            AddSubBit addSubBit = new AddSubBit(components[0], hasString);
+            for (int i = 1; i < components.length; i++) {
+                addSubBit.append(components[i]);
+            }
+            return addSubBit.evaluateFinal();
+        } else {
+            return SympySolver.solve(expression);
         }
 
-        return simplify(sb.toString());
     }
 
     public static ExpressionDescription parse(String fullExpression) {
@@ -810,164 +788,27 @@ public class ExpressionHelper {
         return true;
     }
 
-    public static String solveBracket(String a, String b, String op) {
-
-        ArrayList<String> aTokens = new ArrayList<String>();
-        ArrayList<String> bTokens = new ArrayList<String>();
-        ArrayList<String> result = new ArrayList<String>();
-        boolean isANeg = false;
-        boolean isBNeg = false;
-
-        if (a.startsWith("{") && a.endsWith("}")) {
-            String[] aComponents = parseSingle(a.substring(1, a.length() - 1));
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < aComponents.length; i++) {
-                if (aComponents[i].matches("\\+|-") && i != 0) {
-                    aTokens.add(sb.toString());
-                    aTokens.add(aComponents[i]);
-                    sb = new StringBuilder();
-                } else {
-                    sb.append(aComponents[i]);
-                }
-            }
-
-            if (sb.length() != 0) {
-                aTokens.add(sb.toString());
-            }
-
-        } else {
-            aTokens.add(a);
-        }
-
-        if (b.startsWith("{") && b.endsWith("}")) {
-
-            String[] bComponents = parseSingle(b.substring(1, b.length() - 1));
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bComponents.length; i++) {
-                if (bComponents[i].matches("\\+|-") && i != 0) {
-                    bTokens.add(sb.toString());
-                    bTokens.add(bComponents[i]);
-                    sb = new StringBuilder();
-                } else {
-                    sb.append(bComponents[i]);
-                }
-            }
-
-            if (sb.length() != 0) {
-                bTokens.add(sb.toString());
-            }
-
-        } else {
-            bTokens.add(b);
-        }
-
-        AddSubBit addSubBit = new AddSubBit("0", false);
-        for (int i = 0; i < aTokens.size(); i++) {
-            String aToken = aTokens.get(i);
-            if (aToken.equals("+")) {
-                continue;
-            } else if (aToken.equals("-")) {
-                isANeg = isANeg ^ true;
-                continue;
-            } else if (aToken.startsWith("-")) {
-                isANeg = true;
-                aToken = aToken.substring(1);
-            }
-
-            for (int j = 0; j < bTokens.size(); j++) {
-                String bToken = bTokens.get(j);
-                if (bToken.equals("+")) {
-                    continue;
-                } else if (bToken.equals("-")) {
-                    isBNeg = isBNeg ^ true;
-                    continue;
-                } else if (bToken.startsWith("-")) {
-                    isBNeg = true;
-                    bToken = bToken.substring(1);
-                }
-
-                boolean isNeg = isANeg ^ isBNeg;
-                MultDivMod multDivMod = new MultDivMod("1", "*");
-
-                if (aToken.contains("*") || aToken.contains("/")) {
-                    String[] aComponents = parseSingle(aToken);
-                    for (int x = 0; x < aComponents.length; x++) {
-                        multDivMod.append(aComponents[x]);
-                        System.out.println("appending: " + aComponents[x]);
-                    }
-                } else {
-                    multDivMod.append(aToken);
-                    System.out.println("appending: " + aToken);
-                }
-
-                multDivMod.append(op);
-
-                if (bToken.contains("*") || bToken.contains("/")) {
-                    String[] bComponents = parseSingle(bToken);
-                    for (int x = 0; x < bComponents.length; x++) {
-                        if (bComponents[x].equals("*")) {
-                            multDivMod.append("/");
-                        } else if (bComponents[x].equals("/")) {
-                            multDivMod.append("*");
-                        } else {
-                            multDivMod.append(bComponents[x]);
-                            System.out.println("appending: " + bComponents[x]);
-                        }
-                    }
-                } else {
-                    multDivMod.append(bToken);
-                }
-
-                if (isNeg) {
-                    addSubBit.append("-");
-                    System.out.println("final " + multDivMod.evaluateFinal());
-                    addSubBit.append(multDivMod.evaluateFinal());
-                } else {
-                    addSubBit.append("+");
-                    System.out.println("final " + multDivMod.evaluateFinal());
-                    addSubBit.append(multDivMod.evaluateFinal());
-                }
-
-                isBNeg = false;
-            }
-
-            isANeg = false;
-        }
-
-        return addSubBit.evaluateFinal();
-
-    }
-
     public static void main(String[] args) {
-        // System.out.println(standardize("1.2 * varName .
-        // hasSpaceBeforeAndAfterDot . [already has bracket] * -88 + 'hello!
-        // Leave the spaces and CaPiTaLiSaTiOn alone!'"));
-        // System.out.println(simplify("5+8*3"));
-        // System.out.println(simplify("5+8*varName+varName+2+VARNAME"));
-        // System.out.println(simplify("5+8*varName*varName-7"));
-        // System.out.println(simplify("5+8*varName*varName/varName-5*varName+0-0"));
-        // System.out.println(simplify("5+8*varName*varName/varName/varName"));
-        // System.out.println(simplify("5+8*varName*varName/varName/varName/varName"));
-        // System.out.println(simplify("'he'+'llo'+varName"));
-        // System.out.println(simplify("'he'+varName+'llo'"));
-        // System.out.println(simplify("'he'+''+'llo'"));
-        // System.out.println(simplify("1/x+2/x+2/y+4/y+3*x%3-5*x/y+x/y+7*x/y+6/y"));
-        // System.out.println(simplify("3*x%3"));
-        // System.out.println(evaluate("4*(5*xs+2)"));
-        //		System.out.println(parseSingle("1++1"));
-        // System.out.println(simplify("3/y+x/y"));
-        // System.out.println(evaluate("x*(yasd%4+3+4*(3+s)*4/3)+2"));
-        String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
-        for (int i = 0; i < a.length; i++) {
-            System.out.println(a[i]);
-        }
-        System.out.println(parse(("1>=1")));
-        System.out.println(parse("1<=1"));
-        System.out.println(parse("1!=1"));
-        System.out.println(parse("1<>1"));
-        System.out.println(parse("1>>1"));
-        System.out.println(parse("1<1<"));
-        System.out.println(parse("1=>1"));
+        //System.out.println(standardize("1.2 * varName .hasSpaceBeforeAndAfterDot . [already has bracket] * -88 + 'hello! Leave the spaces and CaPiTaLiSaTiOn alone!'"));
+        System.out.println(evaluate("5+8*3"));
+        System.out.println(evaluate("5+8*varName+varName+2"));
+        System.out.println(evaluate("5+8*varName*varName-7"));
+        System.out.println(evaluate("5+8*varName*varName/varName-5*varName+0-0"));
+        System.out.println(evaluate("5+8*varName*varName/varName/varName"));
+        System.out.println(evaluate("5+8*varName*varName/varName/varName/varName"));
+        System.out.println(evaluate("'he'+'llo'+varName"));
+        System.out.println(evaluate("'he'+varName+'llo'"));
+        System.out.println(evaluate("'he'+''+'llo'"));
+        System.out.println(evaluate("1/x+2/x+2/y+4/y+3*x%3-5*x/y+x/y+7*x/y+6/y"));
+        System.out.println(evaluate("3*x%3"));
+        System.out.println(evaluate("4*(5*xs+2)"));
+        System.out.println(parseSingle("1++1"));
+        System.out.println(evaluate("3/y+x/y"));
+        System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
+        System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
+        //		 String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
+        //		 for (int i = 0; i < a.length; i++) {
+        //			 System.out.println(a[i]);
+        //		 }
     }
-
 }
