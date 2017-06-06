@@ -762,26 +762,25 @@ public class ExpressionHelper {
     public static ExpressionDescription parse(String fullExpression) {
         //Pattern pattern = Pattern.compile("(?<comparator><>|[<>!]=?|[=!]>?|[=!>]<?|[<>=]!?)");
         Pattern pattern = Pattern.compile("(?<comparator><>|<=|>=|!=|>|<|=)");
-        Pattern patternTwo = Pattern.compile("[^<>!=]");
         Matcher matcher = pattern.matcher(fullExpression);
+        ExpressionDescription obj = new ExpressionDescription(fullExpression);
         if(matcher.find()) {
             System.out.println("Success: " + matcher.group(1));
             String comparator = matcher.group("comparator");
             if(matcher.find()) {
-                return null;
+                obj.setSuccessful(false);
+                return obj;
             } else {
-                ExpressionDescription obj = new ExpressionDescription(fullExpression);
                 obj.setLeftExpression(fullExpression.substring(0, fullExpression.indexOf(comparator.charAt(0))));
                 obj.setComparatorString(comparator);
                 obj.setRightExpression(fullExpression.substring(fullExpression.indexOf(comparator.charAt(comparator.length()-1))+ 1));
                 return obj;
             }
         } else {
-            if(patternTwo.matcher(fullExpression).matches()) {
-                return new ExpressionDescription(fullExpression);
-            }
+            obj = new ExpressionDescription(fullExpression);
+            obj.setSuccessful(false);
+            return obj;
         }
-        return null;
     }
 
     public static boolean isTautology(String fullExpression) {

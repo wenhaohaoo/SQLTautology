@@ -4,13 +4,13 @@ public class ExpressionDescription {
     private String rightExpression;
     private String comparatorString;
     private String originalDescription;
-    boolean isSuccessful;
+    private boolean isSuccessful;
 
     public ExpressionDescription(String input) {
         // TODO Auto-generated constructor stub
         this.setOriginalDescription(input);
         // verification code
-        isSuccessful = true;
+        setSuccessful(true);
     }
 
     String getLeftExpression() {
@@ -43,6 +43,14 @@ public class ExpressionDescription {
 
     public void setOriginalDescription(String originalDescription) {
         this.originalDescription = originalDescription;
+    }
+
+    public boolean isSuccessful() {
+        return isSuccessful;
+    }
+
+    public void setSuccessful(boolean isSuccessful) {
+        this.isSuccessful = isSuccessful;
     }
 
 }
