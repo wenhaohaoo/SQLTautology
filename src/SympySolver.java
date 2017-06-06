@@ -8,135 +8,134 @@ import java.util.HashMap;
 
 public class SympySolver {
 
-    private static HashMap<String, String> hashMap;
-    private static HashMap<String, String> reversedMap;
+	private static HashMap<String, String> hashMap = new HashMap<String, String>();
+	private static HashMap<String, String> reversedMap = new HashMap<String, String>();
 
-    public SympySolver() {
-        hashMap = new HashMap<String, String>();
-        reversedMap = new HashMap<String, String>();
-    }
+	public SympySolver() {
 
+	}
 
-    private static String[] preProcess(String expression) {
-        final String IMPORT_LIBRARY = "from sympy import *\n";
-        final String INIT_SYMBOL = "%1$ssymbols(%2$s)\n";
-        final String PRINT_FUNCTION = "print(factor(simplify(%1$s)))\n";
+	private static String[] preProcess(String expression) {
+		final String IMPORT_LIBRARY = "from sympy import *\n";
+		final String INIT_SYMBOL = "%1$ssymbols(%2$s)\n";
+		final String PRINT_FUNCTION = "print(factor(simplify(%1$s)))\n";
 
-        ArrayList<String> script = new ArrayList<String>();
-        String[] parser = ExpressionHelper.parseSingle(expression);
-        StringBuilder convertVarToSymbol = new StringBuilder();
-        StringBuilder declareVar = new StringBuilder();
-        StringBuilder modifiedExpression = new StringBuilder();
-        String var = "x";
-        int counter = 1;
+		ArrayList<String> script = new ArrayList<String>();
+		String[] parser = ExpressionHelper.parseSingle(expression);
+		StringBuilder convertVarToSymbol = new StringBuilder();
+		StringBuilder declareVar = new StringBuilder();
+		StringBuilder modifiedExpression = new StringBuilder();
+		String var = "x";
+		int counter = 1;
 
-        for(int i=0; i<parser.length; i++) {
-            if(ExpressionHelper.isValidVariable(parser[i]) && hashMap.containsKey(parser[i])) {
-                modifiedExpression.append(hashMap.get(parser[i]));
-            } else if(ExpressionHelper.isValidVariable(parser[i])) {
-                hashMap.put(parser[i], var + counter);
-                reversedMap.put(var + counter, parser[i]);
-                declareVar.append(var + counter + ",");
-                convertVarToSymbol.append(var + counter + " ");
-                modifiedExpression.append(var + counter++);
-            } else {
-                modifiedExpression.append(parser[i]);
-            }
-        }
+		for (int i = 0; i < parser.length; i++) {
+			if (ExpressionHelper.isValidVariable(parser[i]) && hashMap.containsKey(parser[i])) {
+				modifiedExpression.append(hashMap.get(parser[i]));
+			} else if (ExpressionHelper.isValidVariable(parser[i])) {
+				hashMap.put(parser[i], var + counter);
+				reversedMap.put(var + counter, parser[i]);
+				declareVar.append(var + counter + ",");
+				convertVarToSymbol.append(var + counter + " ");
+				modifiedExpression.append(var + counter++);
+			} else {
+				modifiedExpression.append(parser[i]);
+			}
+		}
 
-        declareVar.setCharAt(declareVar.length()-1, '=');
-        convertVarToSymbol.setCharAt(convertVarToSymbol.length()-1, '\'');
-        convertVarToSymbol.insert(0, "'");
+		script.add(IMPORT_LIBRARY);
+		
+		if (declareVar.length() != 0) {
+			declareVar.setCharAt(declareVar.length() - 1, '=');
+			convertVarToSymbol.setCharAt(convertVarToSymbol.length() - 1, '\'');
+			convertVarToSymbol.insert(0, "'");
+			script.add(String.format(INIT_SYMBOL, declareVar.toString(), convertVarToSymbol.toString()));
+		}
 
-        script.add(IMPORT_LIBRARY);
-        script.add(String.format(INIT_SYMBOL, declareVar.toString(), convertVarToSymbol.toString()));
-        script.add(String.format(PRINT_FUNCTION, modifiedExpression));
+		script.add(String.format(PRINT_FUNCTION, modifiedExpression));
 
-        return script.toArray(new String[script.size()]);
-    }
+		return script.toArray(new String[script.size()]);
+	}
 
-    private static String connectToPython(String[] script) {
+	private static String connectToPython(String[] script) {
 
-        String s = null;
-        String result = "";
+		String s = null;
+		String result = "";
 
-        try {
+		try {
 
-            FileWriter fileWriter = new FileWriter(new File("temp.py"));
+			FileWriter fileWriter = new FileWriter(new File("temp.py"));
 
-            for (int i = 0; i < script.length; i++) {
-            	System.out.println(script[i]);
-                fileWriter.write(script[i]);
-            }
-            fileWriter.flush();
-            fileWriter.close();
+			for (int i = 0; i < script.length; i++) {
+				fileWriter.write(script[i]);
+			}
+			fileWriter.flush();
+			fileWriter.close();
 
+			Process p = Runtime.getRuntime().exec("python temp.py");
 
-            Process p = Runtime.getRuntime().exec("python temp.py");
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(p.getInputStream()));
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(p.getErrorStream()));
+			// read the output from the command
+			// System.out.println("Here is the standard output of the
+			// command:\n");
+			while ((s = stdInput.readLine()) != null) {
+				result = s;
+//				 System.out.println(s);
+			}
 
-            // read the output from the command
-            System.out.println("Here is the standard output of the command:\n");
-            while ((s = stdInput.readLine()) != null) {
-                result = s;
-                System.out.println(s);
-            }
+			// read any errors from the attempted command
+			// System.out.println("Here is the standard error of the command (if
+			// any):\n");
+			while ((s = stdError.readLine()) != null) {
+//				 System.out.println(s);
+			}
 
-            // read any errors from the attempted command
-            System.out.println("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-            }
+			p.destroy();
 
-            p.destroy();
+		} catch (IOException e) {
+//			System.out.println("exception happened - here's what I know: ");
+			e.printStackTrace();
+			System.exit(-1);
+		}
 
-        }
-        catch (IOException e) {
-            System.out.println("exception happened - here's what I know: ");
-            e.printStackTrace();
-            System.exit(-1);
-        }
+		return result;
+	}
 
-        return result;
-    }
+	private static String postProcess(String expression) {
+		expression = expression.replace("**", "&");
+		String[] components = ExpressionHelper.parseSingle(expression);
+		StringBuilder sb = new StringBuilder();
+		String lastVar = "";
+		for (int i = 0; i < components.length; i++) {
+			if (reversedMap.containsKey(components[i])) {
+				components[i] = reversedMap.get(components[i]);
+				lastVar = components[i];
+			} else if (components[i].equals("&")) {
+				sb.replace(sb.length() - lastVar.length(), sb.length(), "");
+				// sb.substring(0, sb.length()-lastVar.length());
+				sb.append("Math.pow(" + lastVar + ", " + components[i + 1] + ")");
+				i += 2;
+			}
+			sb.append(components[i]);
+		}
+		hashMap.clear();
+		reversedMap.clear();
+		return sb.toString();
+	}
 
-    private static String postProcess(String expression) {
-        expression = expression.replace("**", "&");
-        String[] components = ExpressionHelper.parseSingle(expression);
-        StringBuilder sb = new StringBuilder();
-        String lastVar = "";
-        for (int i = 0; i < components.length; i++) {
-        	if (reversedMap.containsKey(components[i])) {
-        		components[i] = reversedMap.get(components[i]);
-        		lastVar = components[i];
-        		System.out.println(components[i]);
-        	} else if (components[i].equals("&")) {
-        		sb.replace(sb.length()-lastVar.length(), sb.length(), "");
-        		sb.substring(0, sb.length()-lastVar.length());
-        		sb.append("POWER(" + lastVar + ", " + components[i+1] + ")");
-        		i+=2;
-        	}
-        	sb.append(components[i]);
-        }
-        return sb.toString();
-    }
-
-    public static String solve(String expression) {
-        String[] sympyString = preProcess(expression);
-        String result = connectToPython(sympyString);
-        result = postProcess(result);
-        System.out.println("RESULT: " + result);
-        return result;
-    }
-
-    public static void main(String[] args) {
-        SympySolver sympySolver = new SympySolver();
-        solve("(x + (x+3) + 3) + y*y*y*y*y/y/x");
-    }
+	public static String solve(String expression) {
+		String[] sympyString = preProcess(expression);
+		String result = connectToPython(sympyString);
+		result = postProcess(result);
+//		System.out.println("RESULT: " + result);
+		return result;
+	}
+	
+	public static void main(String[] args) {
+		SympySolver ss = new SympySolver();
+		solve("5*8+3");
+	}
 
 }
