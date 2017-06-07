@@ -790,53 +790,64 @@ public class ExpressionHelper {
 	public static boolean isTautology(String fullExpression) {
 
 		ExpressionDescription expDes = parse(fullExpression);
-		
+
 		if (expDes.isSuccessful()) {
-			
-			if (expDes.getComparatorString().equals("=")) {
+
+			switch (expDes.getComparatorString()) {
+
+			case "=":
+				return true;
 				
-			} else if (expDes.getComparatorString().equals("!=") || expDes.getComparatorString().equals("<>")) {
+			case "!=":
+			case "<>":
+				System.out.println(1);
+				return true;
 				
-			} else if (expDes.getComparatorString().equals(">")) {
+			case ">":
+				return true;
 				
-			} else if (expDes.getComparatorString().equals("<")) {
+			case "<":
+				return true;
 				
-			} else if (expDes.getComparatorString().equals("<=")) {
+			case "<=":
+				return true;
 				
-			} else if (expDes.getComparatorString().equals(">=")) {
+			case ">=":
+				return true;
 				
-			} else {
+			default:
 				System.err.println(String.format("comparator %s not recognised, bug detected", expDes.getComparatorString()));
 				return false;
+
 			}
-			
-			
+
 		} else {
 			return false;
 		}
-		
+
 	}
 
 	public static void main(String[] args) {
 		// System.out.println(standardize("1.2 * varName
 		// .hasSpaceBeforeAndAfterDot . [already has bracket] * -88 + 'hello!
 		// Leave the spaces and CaPiTaLiSaTiOn alone!'"));
-		System.out.println(evaluate("5+8*3"));
-		System.out.println(evaluate("5+8*varName+varName+2"));
-		System.out.println(evaluate("5+8*varName*varName-7"));
-		System.out.println(evaluate("5+8*varName*varName/varName-5*varName+0-0"));
-		System.out.println(evaluate("5+8*varName*varName/varName/varName"));
-		System.out.println(evaluate("5+8*varName*varName/varName/varName/varName"));
-		System.out.println(evaluate("'he'+'llo'+varName"));
-		System.out.println(evaluate("'he'+varName+'llo'"));
-		System.out.println(evaluate("'he'+''+'llo'"));
-		System.out.println(evaluate("1/x+2/x+2/y+4/y+3*x%3-5*x/y+x/y+7*x/y+6/y"));
-		System.out.println(evaluate("3*x%3"));
-		System.out.println(evaluate("4*(5*xs+2)"));
-		System.out.println(parseSingle("1++1", false));
-		System.out.println(evaluate("3/y+x/y"));
-		System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
-		System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
+//		System.out.println(evaluate("5+8*3"));
+//		System.out.println(evaluate("5+8*varName+varName+2"));
+//		System.out.println(evaluate("5+8*varName*varName-7"));
+//		System.out.println(evaluate("5+8*varName*varName/varName-5*varName+0-0"));
+//		System.out.println(evaluate("5+8*varName*varName/varName/varName"));
+//		System.out.println(evaluate("5+8*varName*varName/varName/varName/varName"));
+//		System.out.println(evaluate("'he'+'llo'+varName"));
+//		System.out.println(evaluate("'he'+varName+'llo'"));
+//		System.out.println(evaluate("'he'+''+'llo'"));
+//		System.out.println(evaluate("1/x+2/x+2/y+4/y+3*x%3-5*x/y+x/y+7*x/y+6/y"));
+//		System.out.println(evaluate("3*x%3"));
+//		System.out.println(evaluate("4*(5*xs+2)"));
+//		System.out.println(parseSingle("1++1", false));
+//		System.out.println(evaluate("3/y+x/y"));
+//		System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
+//		System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
+		System.out.println(isTautology("a><b"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
