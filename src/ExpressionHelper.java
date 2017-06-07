@@ -762,13 +762,13 @@ public class ExpressionHelper {
     }
 
     public static ExpressionDescription parse(String fullExpression) {
-        // Pattern pattern =
-        // Pattern.compile("(?<comparator><>|[<>!]=?|[=!]>?|[=!>]<?|[<>=]!?)");
-        Pattern pattern = Pattern.compile("(?<comparator><>|<=|>=|!=|>|<|=)");
+        Pattern pattern =
+                Pattern.compile("(?<comparator><>|[<>!]=?|[=!]>?|[=!>]<?|[<>=]!?)");
+        //Pattern pattern = Pattern.compile("(?<comparator><>|<=|>=|!=|>|<|=)");
         Matcher matcher = pattern.matcher(fullExpression);
         ExpressionDescription obj = new ExpressionDescription(fullExpression);
         if (matcher.find() && isValidComparator(matcher.group("comparator"))) {
-//            System.out.println("Success: " + matcher.group(1));
+            //System.out.println("Success: " + matcher.group(1));
             String comparator = matcher.group("comparator");
             if (matcher.find()) {
                 obj.setSuccessful(false);
@@ -846,14 +846,14 @@ public class ExpressionHelper {
         //		System.out.println(evaluate("3/y+x/y"));
         //		System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
         //		System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
-    	System.out.println(isTautology("a=b"));
-    	System.out.println(isTautology("a!=b"));
-    	System.out.println(isTautology("a<>b"));
-    	System.out.println(isTautology("a<=b"));
-    	System.out.println(isTautology("a>=b"));
-    	System.out.println(isTautology("a>b"));
-    	System.out.println(isTautology("a<b"));
-    	System.out.println("---");
+        System.out.println(isTautology("a=b"));
+        System.out.println(isTautology("a!=b"));
+        System.out.println(isTautology("a<>b"));
+        System.out.println(isTautology("a<=b"));
+        System.out.println(isTautology("a>=b"));
+        System.out.println(isTautology("a>b"));
+        System.out.println(isTautology("a<b"));
+        System.out.println("---");
         System.out.println(isTautology("a><b"));
         System.out.println(isTautology("a!<b"));
         System.out.println(isTautology("a<!b"));
