@@ -648,7 +648,7 @@ public class ExpressionHelper {
 		if (components.length == 0) {
 			return false;
 		} else if (!(components[0].equals("-") || components[0].equals("(") || components[0].equals("")
-				|| isValidNumber(components[0]) || isValidVariable(components[0]) || isValidNumber(components[0])
+				|| isValidNumber(components[0]) || isValidVariable(components[0]) || isValidString(components[0])
 				|| isValidNull(components[0]))) {
 			System.out.println("cannot start with: " + components[0]);
 			return false;
