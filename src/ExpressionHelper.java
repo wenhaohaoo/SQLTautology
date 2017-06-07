@@ -638,8 +638,9 @@ public class ExpressionHelper {
 		boolean hasString = false;
 		boolean hasVariable = false;
 		boolean hasNull = false;
-		boolean hasOtherOp = false;
+		Boolean hasOtherOp = null;
 		boolean isOp = false;
+		boolean isOpBrac = false;
 		boolean hasConsecutiveOps = false;
 		int brackets = 0;
 		String op = "";
@@ -659,17 +660,26 @@ public class ExpressionHelper {
 			if (isValidNumber(components[i])) {
 				hasNumber = true;
 				isOp = false;
+				isOpBrac = false;
 			} else if (isValidString(components[i])) {
 				hasString = true;
 				isOp = false;
+				isOpBrac = false;
 			} else if (isValidVariable(components[i])) {
 				hasVariable = true;
 				isOp = false;
+				isOpBrac = false;
 			} else if (isValidNull(components[i])) {
 				hasNull = true;
 				isOp = false;
+				isOpBrac = false;
 			} else if (components[i].matches("-|\\+|\\*|/|%|&|\\|")) {
 
+				if (isOpBrac) {
+					System.err.println("opening bracket should not be followed by op");
+					return false;
+				}
+				
 				if (isOp) {
 					hasConsecutiveOps = true;
 					op = op + components[i];
@@ -682,8 +692,11 @@ public class ExpressionHelper {
 					hasOtherOp = true;
 				}
 				
+				isOpBrac = false;
+				
 			} else if (components[i].matches("\\(")) {
 				brackets++;
+				isOpBrac = true;
 				isOp = false;
 			} else if (components[i].matches("\\)")) {
 				brackets--;
@@ -692,6 +705,7 @@ public class ExpressionHelper {
 					return false;
 				}
 				isOp = false;
+				isOpBrac = false;
 			} else {
 				System.err.println("got this case: " + components[i]);
 				return false;
@@ -704,10 +718,15 @@ public class ExpressionHelper {
 		} else if (hasNull && (hasString || hasVariable || hasNumber)) {
 			System.err.println("null & smth else");
 			return false;
-		} else if (hasString) {
+		} else if (hasString && hasVariable) {
 			System.err.println("string only +");
-			return !hasOtherOp;
-		} else if (hasConsecutiveOps) {
+			if (hasOtherOp == null) {
+				System.err.println("no op");
+				return false;
+			} else {
+				return !hasOtherOp;
+			}
+		}else if (hasConsecutiveOps) {
 			System.err.println("consecutive only +- or *- or /-");
 			System.err.println(op);
 			return op.equals("+-") || op.equals("*-") || op.equals("/-");
@@ -913,7 +932,7 @@ public class ExpressionHelper {
 		System.out.println(isTautology("a==>b"));
 		System.out.println(isTautology("a>==b"));
 		System.out.println(isValidExpression("x/*-5"));
-		System.out.println(isValidExpression("(1+2+)x+s()"));
+		System.out.println(isValidExpression("(gskd1/1)"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
