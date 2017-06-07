@@ -680,11 +680,14 @@ public class ExpressionHelper {
 				if (components[i].matches("-||\\*|/|%|&|\\|")) {
 					hasOtherOp = true;
 				}
+				isOp = false;
 
 			} else if (components[i].matches("\\(")) {
 				brackets++;
+				isOp = false;
 			} else if (components[i].matches("\\)")) {
 				brackets--;
+				isOp = false;
 			} else {
 				System.out.println("got this case: " + components[i]);
 				return false;
@@ -702,6 +705,7 @@ public class ExpressionHelper {
 			return !hasOtherOp;
 		} else if (hasConsecutiveOps) {
 			System.out.println("consecutive only +- or *- or /-");
+			System.out.println(op);
 			return op.equals("+-") || op.equals("*-") || op.equals("/-");
 		} else {
 			return true;
@@ -902,7 +906,7 @@ public class ExpressionHelper {
 		System.out.println(isTautology("a==>b"));
 		System.out.println(isTautology("a>==b"));
 		System.out.println(isValidExpression("x/*-5"));
-		System.out.println(isValidExpression("x!+x"));
+		System.out.println(isValidExpression("x+x*-1/1"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
