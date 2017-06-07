@@ -54,7 +54,7 @@ public class SympySolver {
         }
 
         script.add(String.format(PRINT_FUNCTION, modifiedExpression));
-        roots = String.format(PRINT_ROOTS, modifiedExpression);
+        script.add(String.format(PRINT_ROOTS, modifiedExpression));
 
         return script.toArray(new String[script.size()]);
     }
@@ -62,7 +62,7 @@ public class SympySolver {
     private static String connectToPython(String[] script) {
 
         String s = null;
-        String results = "";
+        ArrayList<String> results = new ArrayList<String>();
 
         try {
 
@@ -84,7 +84,7 @@ public class SympySolver {
             // System.out.println("Here is the standard output of the
             // command:\n");
             while ((s = stdInput.readLine()) != null) {
-                results = s;
+                results.add(s);
                 //				 System.out.println(s);
             }
 
@@ -103,7 +103,11 @@ public class SympySolver {
             System.exit(-1);
         }
 
-        return results;
+        if (results.size() > 1) {
+        	roots = results.get(1);
+        }
+        
+        return results.get(0);
     }
 
     private static String postProcess(String expression) {
@@ -142,13 +146,18 @@ public class SympySolver {
         String[] sympyString = preProcess(expression);
         String result = connectToPython(sympyString);
         String results = postProcess(result);
-//        System.out.println("RESULT: " + results);
+        System.out.println("RESULT: " + results);
         return results;
+    }
+    
+    public static String getRoots() {
+    	return roots;
     }
 
     public static void main(String[] args) {
         SympySolver ss = new SympySolver();
-        solve("x*x+4*x+4");
+        solve("x*x*x*x*x*x*x*x*x+3");
+        System.out.println(roots);
     }
 
 }

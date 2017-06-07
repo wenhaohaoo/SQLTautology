@@ -478,6 +478,10 @@ public class ExpressionHelper {
     public static boolean isValidNumber(String numberExpression) {
         return numberExpression.trim().matches("-?\\d+(\\.\\d+)?");
     }
+    
+    public static boolean isValidOperator(String operator) {
+    	return operator.matches("-|\\+|\\*|/|%|&|\\|");
+    }
 
     public static boolean isValidVariable(String variableExpression) {
         StringTokenizer tokenizer = new StringTokenizer(variableExpression, ".");
@@ -627,7 +631,7 @@ public class ExpressionHelper {
         return sb.toString();
     }
 
-    public static boolean isValidBasicExpression(String basicExpression) {
+    public static boolean isValidExpression(String expression) {
 
         /* Indicator Variables */
         boolean hasNumber = false;
@@ -635,23 +639,26 @@ public class ExpressionHelper {
         boolean hasVariable = false;
         boolean hasNull = false;
         boolean hasOtherOp = false;
-        boolean hasBrackets = false;
         boolean isOp = false;
         boolean hasConsecutiveOps = false;
         String op1 = "";
         String op2 = "";
 
-        String[] components = parseSingle(basicExpression, false);
+        String[] components = parseSingle(expression, true);
 
         for (int i = 0; i < components.length; i++) {
             if (isValidNumber(components[i])) {
                 hasNumber = true;
+                isOp = false;
             } else if (isValidString(components[i])) {
                 hasString = true;
+                isOp = false;
             } else if (isValidVariable(components[i])) {
                 hasVariable = true;
+                isOp = false;
             } else if (isValidNull(components[i])) {
                 hasNull = true;
+                isOp = false;
             } else if (components[i].matches("-|\\+|\\*|/|%|&|\\|")) {
 
                 if (isOp) {
@@ -790,29 +797,39 @@ public class ExpressionHelper {
     public static boolean isTautology(String fullExpression) {
 
         ExpressionDescription expDes = parse(fullExpression);
+        boolean isEqual = false;
+        boolean isGreater = false;
+        boolean isLesser = false;
 
         if (expDes.isSuccessful()) {
 
+        	String left = expDes.getLeftExpression();
+        	String right = expDes.getRightExpression();
+        	
+        	fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
+        	
+        	
+        	
             switch (expDes.getComparatorString()) {
-
+                
             case "=":
-                return true;
+                return isEqual && !isGreater && !isLesser;
 
             case "!=":
             case "<>":
-                return true;
+                return !(isEqual && !isGreater && !isLesser);
 
             case ">":
-                return true;
+                return isGreater && !isEqual;
 
             case "<":
-                return true;
-
+                return isLesser && !isEqual;
+                
             case "<=":
-                return true;
+                return isEqual && isGreater;
 
             case ">=":
-                return true;
+                return isEqual && isLesser;
 
             default:
                 System.err.println(String.format("comparator %s not recognised, bug detected", expDes.getComparatorString()));
@@ -860,6 +877,14 @@ public class ExpressionHelper {
         System.out.println(isTautology("a=>b"));
         System.out.println(isTautology("a<>=b"));
         System.out.println(isTautology("a!>b"));
+        System.out.println(isTautology("a==b"));
+        System.out.println(isTautology("a=!b"));
+        System.out.println(isTautology("a===b"));
+        System.out.println(isTautology("a=<b"));
+        System.out.println(isTautology("a==!b"));
+        System.out.println(isTautology("a==>b"));
+        System.out.println(isTautology("a>==b"));
+        System.out.println(isValidExpression("x*x%3*Y+-S"));
         // String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
         // for (int i = 0; i < a.length; i++) {
         // System.out.println(a[i]);
