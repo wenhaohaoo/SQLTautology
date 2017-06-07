@@ -10,6 +10,7 @@ public class SympySolver {
 
     private static HashMap<String, String> hashMap = new HashMap<String, String>();
     private static HashMap<String, String> reversedMap = new HashMap<String, String>();
+    private static String roots;
 
     public SympySolver() {
 
@@ -22,7 +23,7 @@ public class SympySolver {
         final String PRINT_ROOTS = "print(roots(factor(simplify(%1$s))))\n";
 
         ArrayList<String> script = new ArrayList<String>();
-        String[] parser = ExpressionHelper.parseSingle(expression);
+        String[] parser = ExpressionHelper.parseSingle(expression, true);
         StringBuilder convertVarToSymbol = new StringBuilder();
         StringBuilder declareVar = new StringBuilder();
         StringBuilder modifiedExpression = new StringBuilder();
@@ -53,15 +54,15 @@ public class SympySolver {
         }
 
         script.add(String.format(PRINT_FUNCTION, modifiedExpression));
-        script.add(String.format(PRINT_ROOTS, modifiedExpression));
+        roots = String.format(PRINT_ROOTS, modifiedExpression);
 
         return script.toArray(new String[script.size()]);
     }
 
-    private static ArrayList<String> connectToPython(String[] script) {
+    private static String connectToPython(String[] script) {
 
         String s = null;
-        ArrayList<String> results = new ArrayList<String>();
+        String results = "";
 
         try {
 
@@ -83,7 +84,7 @@ public class SympySolver {
             // System.out.println("Here is the standard output of the
             // command:\n");
             while ((s = stdInput.readLine()) != null) {
-                results.add(s);
+                results = s;
                 //				 System.out.println(s);
             }
 
@@ -105,25 +106,32 @@ public class SympySolver {
         return results;
     }
 
-    private static String postProcess(ArrayList<String> array) {
-        //System.out.println(expression);
-        String expression = array.get(0);
-        System.out.println(expression);
+    private static String postProcess(String expression) {
+//        System.out.println(expression);
         expression = expression.replace("**", "&");
-        String[] components = ExpressionHelper.parseSingle(expression);
+        String[] components = ExpressionHelper.parseSingle(expression, true);
         StringBuilder sb = new StringBuilder();
-        String lastVar = "";
         for (int i = 0; i < components.length; i++) {
             if (reversedMap.containsKey(components[i])) {
                 components[i] = reversedMap.get(components[i]);
-                lastVar = components[i];
-            } else if (components[i].equals("&")) {
-                sb.replace(sb.length() - lastVar.length(), sb.length(), "");
-                // sb.substring(0, sb.length()-lastVar.length());
-                sb.append("Math.pow(" + lastVar + ", " + components[i + 1] + ")");
-                i += 2;
             }
             sb.append(components[i]);
+        }
+        expression = sb.toString();
+        
+        components = ExpressionHelper.parseSingle(expression, false);
+        sb = new StringBuilder();
+        String lastVar = components[0];
+        sb.append(components[0]);
+        for (int i = 1; i < components.length; i++) {
+	        if (components[i].equals("&")) {
+	            sb.replace(sb.length() - lastVar.length(), sb.length(), "");
+	            sb.append("Math.pow(" + lastVar + ", " + components[i + 1] + ")");
+	            lastVar = components[i+1];
+	            i += 1;
+	        } else {
+	        	sb.append(components[i]);
+	        }
         }
         hashMap.clear();
         reversedMap.clear();
@@ -132,15 +140,15 @@ public class SympySolver {
 
     public static String solve(String expression) {
         String[] sympyString = preProcess(expression);
-        ArrayList<String> result = connectToPython(sympyString);
+        String result = connectToPython(sympyString);
         String results = postProcess(result);
-        System.out.println("RESULT: " + results);
+//        System.out.println("RESULT: " + results);
         return results;
     }
 
     public static void main(String[] args) {
         SympySolver ss = new SympySolver();
-        solve("5*8+3*x");
+        solve("x*x+4*x+4");
     }
 
 }

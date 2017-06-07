@@ -1,4 +1,3 @@
 from sympy import *
-x1=symbols('x1')
-print(factor(simplify(5*8+3*x1)))
-print(roots(factor(simplify(5*8+3*x1))))
+x1,x2,x3=symbols('x1 x2 x3')
+print(factor(simplify(x1*(x2%4+3+4*(3+x3)*4/3)+2)))
