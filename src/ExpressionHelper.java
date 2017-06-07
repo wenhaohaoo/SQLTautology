@@ -708,6 +708,9 @@ public class ExpressionHelper {
 			System.out.println("consecutive only +- or *- or /-");
 			System.out.println(op);
 			return op.equals("+-") || op.equals("*-") || op.equals("/-");
+		} else if (brackets != 0) {
+			System.out.println("opening and closing brackets not same");
+			return false;
 		} else {
 			return true;
 		}
