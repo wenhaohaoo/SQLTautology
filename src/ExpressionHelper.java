@@ -906,7 +906,7 @@ public class ExpressionHelper {
 		System.out.println(isTautology("a==>b"));
 		System.out.println(isTautology("a>==b"));
 		System.out.println(isValidExpression("x/*-5"));
-		System.out.println(isValidExpression("x+x*-1/1"));
+		System.out.println(isValidExpression("(1+2)"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
