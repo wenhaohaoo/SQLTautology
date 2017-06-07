@@ -784,6 +784,7 @@ public class ExpressionHelper {
     }
 
     public static boolean isTautology(String fullExpression) {
+
         return true;
     }
 
