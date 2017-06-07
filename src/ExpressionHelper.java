@@ -789,7 +789,32 @@ public class ExpressionHelper {
 
 	public static boolean isTautology(String fullExpression) {
 
-		return true;
+		ExpressionDescription expDes = parse(fullExpression);
+		
+		if (expDes.isSuccessful()) {
+			
+			if (expDes.getComparatorString().equals("=")) {
+				
+			} else if (expDes.getComparatorString().equals("!=") || expDes.getComparatorString().equals("<>")) {
+				
+			} else if (expDes.getComparatorString().equals(">")) {
+				
+			} else if (expDes.getComparatorString().equals("<")) {
+				
+			} else if (expDes.getComparatorString().equals("<=")) {
+				
+			} else if (expDes.getComparatorString().equals(">=")) {
+				
+			} else {
+				System.err.println(String.format("comparator %s not recognised, bug detected", expDes.getComparatorString()));
+				return false;
+			}
+			
+			
+		} else {
+			return false;
+		}
+		
 	}
 
 	public static void main(String[] args) {
