@@ -684,37 +684,35 @@ public class ExpressionHelper {
 				
 			} else if (components[i].matches("\\(")) {
 				brackets++;
-				if (isOp) {
-					return false;
-				}
 				isOp = false;
 			} else if (components[i].matches("\\)")) {
 				brackets--;
 				if (brackets < 0 || isOp) {
+					System.err.println(") cannot follow after op");
 					return false;
 				}
 				isOp = false;
 			} else {
-				System.out.println("got this case: " + components[i]);
+				System.err.println("got this case: " + components[i]);
 				return false;
 			}
 		}
 
 		if (hasNumber && hasString) {
-			System.out.println("num & string");
+			System.err.println("num & string");
 			return false;
 		} else if (hasNull && (hasString || hasVariable || hasNumber)) {
-			System.out.println("null & smth else");
+			System.err.println("null & smth else");
 			return false;
 		} else if (hasString) {
-			System.out.println("string only +");
+			System.err.println("string only +");
 			return !hasOtherOp;
 		} else if (hasConsecutiveOps) {
-			System.out.println("consecutive only +- or *- or /-");
-			System.out.println(op);
+			System.err.println("consecutive only +- or *- or /-");
+			System.err.println(op);
 			return op.equals("+-") || op.equals("*-") || op.equals("/-");
 		} else if (brackets != 0) {
-			System.out.println("opening and closing brackets not same");
+			System.err.println("opening and closing brackets not same");
 			return false;
 		} else {
 			return true;
