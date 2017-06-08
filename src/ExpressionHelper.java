@@ -866,7 +866,8 @@ public class ExpressionHelper {
 				String var = "";
 
 				fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
-				String[] components = parseSingle(fullExpression, true);
+				String[] results = evaluate(fullExpression);
+				String[] components = parseSingle(results[0], true);
 
 				for (int i = 0; i < components.length; i++) {
 					if (isValidNumber(components[i])) {
@@ -895,8 +896,7 @@ public class ExpressionHelper {
 						System.err.println("unable to solve for more than 1 var");
 						return false;
 					} else {
-						String[] result = evaluate(fullExpression);
-						if (result[1] == null) {
+						if (results[1] == null) {
 							// no roots
 							float ans = subIn(fullExpression, var, "1");
 							if (ans > 0) {
@@ -913,7 +913,7 @@ public class ExpressionHelper {
 								isLesser = false;
 							}
 						} else {
-							String roots = result[1];
+							String roots = results[1];
 
 							if (roots.contains("*I*")) {
 								System.err.println("no real roots, imaginary");
@@ -929,7 +929,7 @@ public class ExpressionHelper {
 								}
 
 								for (int i = 0; i < floatRoots.size(); i++) {
-									float yVal = subIn(result[2], var, floatRoots.get(i).toString());
+									float yVal = subIn(results[2], var, floatRoots.get(i).toString());
 									yValList.add(yVal);
 								}
 
@@ -1037,7 +1037,7 @@ public class ExpressionHelper {
 		// System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
 		// System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
 
-		System.out.println(isTautology("x/x>0"));
+		System.out.println(isTautology("x/x<0"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
