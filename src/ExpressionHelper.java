@@ -7,6 +7,10 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.naming.spi.DirStateFactory.Result;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.IconifyAction;
+import javax.swing.undo.UndoableEdit;
+
 public class ExpressionHelper {
 
 	private static HashSet<String> reserved;
@@ -733,7 +737,8 @@ public class ExpressionHelper {
 		} else if (brackets != 0) {
 			System.err.println("opening and closing brackets not same");
 			return false;
-		} else if (components[0].matches("-|\\+|\\*|/|%|&|\\|") || components[components.length-1].matches("-|\\+|\\*|/|%|&|\\|")){
+		} else if (components[0].matches("-|\\+|\\*|/|%|&|\\|")
+				|| components[components.length - 1].matches("-|\\+|\\*|/|%|&|\\|")) {
 			System.err.println("cannot start or end with op");
 			return false;
 		} else {
@@ -792,7 +797,7 @@ public class ExpressionHelper {
 
 	}
 
-	public static String evaluate(String expression) {
+	public static String[] evaluate(String expression) {
 		String[] components = parseSingle(expression, false);
 		boolean hasString = false;
 
@@ -807,7 +812,9 @@ public class ExpressionHelper {
 			for (int i = 1; i < components.length; i++) {
 				addSubBit.append(components[i]);
 			}
-			return addSubBit.evaluateFinal();
+			String[] result = new String[0];
+			result[0] = addSubBit.evaluateFinal();
+			return result;
 		} else {
 			return SympySolver.solve(expression);
 		}
@@ -843,9 +850,9 @@ public class ExpressionHelper {
 	public static boolean isTautology(String fullExpression) {
 
 		ExpressionDescription expDes = parse(fullExpression);
-		boolean isEqual = false;
-		boolean isGreater = false;
-		boolean isLesser = false;
+		Boolean isEqual = null;
+		Boolean isGreater = null;
+		Boolean isLesser = null;
 
 		if (expDes.isSuccessful()) {
 
@@ -854,40 +861,100 @@ public class ExpressionHelper {
 
 			if (isValidExpression(left) && isValidExpression(right)) {
 
-				if (isValidExpression(left) && isValidExpression(right)) {
+				boolean hasNumber = false;
+				boolean hasString = false;
+				boolean hasVariable = false;
+				boolean hasNull = false;
+				int varCount = 0;
+				
+				fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
+				String[] components = parseSingle(fullExpression, true);
 
-					fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
-
-					switch (expDes.getComparatorString()) {
-
-					case "=":
-						return isEqual && !isGreater && !isLesser;
-
-					case "!=":
-					case "<>":
-						return !(isEqual && !isGreater && !isLesser);
-
-					case ">":
-						return isGreater && !isEqual;
-
-					case "<":
-						return isLesser && !isEqual;
-
-					case "<=":
-						return isEqual && isGreater;
-
-					case ">=":
-						return isEqual && isLesser;
-
-					default:
-						System.err.println(String.format("comparator %s not recognised, bug detected",
-								expDes.getComparatorString()));
-						return false;
-
+				for (int i = 0; i < components.length; i++) {
+					if (isValidNumber(components[i])) {
+						hasNumber = true;
+					} else if (isValidString(components[i])) {
+						hasString = true;
+					} else if (isValidVariable(components[i])) {
+						hasVariable = true;
+						varCount++;
+					} else if (isValidNull(components[i])) {
+						hasNull = true;
 					}
-				} else {
-					return false;
 				}
+
+				if (SympySolver.solve(left)[0].equals(SympySolver.solve(right)[0])) {
+					isEqual = true;
+					isGreater = false;
+					isLesser = false;
+				} else if (hasString) {
+					
+				} else if (hasVariable) {
+					
+					if (varCount > 1) {
+						System.err.println("unable to solve for more than 1 var");
+						return false; 
+					} else {
+						String[] result = SympySolver.solve(fullExpression);
+						if (result[1] == null) {
+							// no roots
+							
+						} else {
+							String roots = result[1];
+							if (roots.contains("*I*")) {
+								System.err.println("no real roots, imaginary");
+								return false;
+							} else {
+								
+							}
+						}
+					}
+					
+				} else {
+					float result = Float.parseFloat(SympySolver.solve(fullExpression)[0]);
+					if (result == 0) {
+						isEqual = true;
+						isGreater = false;
+						isLesser = false;
+					} else if (result > 0) {
+						isEqual = false;
+						isGreater = true;
+						isLesser = false;
+					} else if (result < 0) {
+						isEqual = false;
+						isGreater = false;
+						isLesser = true;
+					}
+				}
+
+				switch (expDes.getComparatorString()) {
+
+				case "=":
+					return isEqual && !isGreater && !isLesser;
+
+				case "!=":
+				case "<>":
+					return !(isEqual && !isGreater && !isLesser);
+
+				case ">":
+					return isGreater && !isEqual;
+
+				case "<":
+					return isLesser && !isEqual;
+
+				case "<=":
+					return isEqual && isGreater;
+
+				case ">=":
+					return isEqual && isLesser;
+
+				default:
+					System.err.println(
+							String.format("comparator %s not recognised, bug detected", expDes.getComparatorString()));
+					return false;
+
+				}
+
 			} else {
 				return false;
 			}
@@ -944,5 +1011,7 @@ public class ExpressionHelper {
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
 		// }
+		String[] asd = new String[2];
+		asd[0] = "a";
 	}
 }

@@ -137,13 +137,13 @@ public class SympySolver {
         String[] sympyString = preProcess(expression);
         String[] result = connectToPython(sympyString);
         String[] results = postProcess(result);
-        System.out.println("RESULT: " + results);
+        System.out.println("RESULT: " + results[1]);
         return results;
     }
 
     public static void main(String[] args) {
         SympySolver ss = new SympySolver();
-        solve("x*x*x*x*x*x*x*x*x+3");
+        solve("x*x-4*x+4");
     }
 
 }
