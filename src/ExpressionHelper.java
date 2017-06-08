@@ -1,5 +1,4 @@
 
-import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,10 +7,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.naming.spi.DirStateFactory.Result;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.IconifyAction;
-import javax.swing.undo.UndoableEdit;
 
 public class ExpressionHelper {
 
