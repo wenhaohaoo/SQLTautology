@@ -930,7 +930,6 @@ public class ExpressionHelper {
 								while (tokenizer.hasMoreTokens()) {
 									String token = tokenizer.nextToken().trim();
 									token = token.substring(0, token.indexOf(":")).replace("{", "").replace("}", "");
-
 									floatRoots.add(Float.parseFloat(token));
 								}
 
@@ -1043,7 +1042,7 @@ public class ExpressionHelper {
 		// System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
 		// System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
 
-		System.out.println(isTautology("x*x>0"));
+		System.out.println(isTautology("x/x>0"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
