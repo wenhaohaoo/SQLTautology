@@ -645,6 +645,7 @@ public class ExpressionHelper {
 		boolean hasConsecutiveOps = false;
 		int brackets = 0;
 		String op = "";
+		String op2 = "";
 
 		String[] components = parseSingle(expression, true);
 		if (components.length == 0) {
@@ -683,7 +684,8 @@ public class ExpressionHelper {
 
 				if (isOp) {
 					hasConsecutiveOps = true;
-					op = op + components[i];
+					op2 = op + components[i];
+					isOp = false;
 				} else {
 					isOp = true;
 					op = components[i];
@@ -729,8 +731,8 @@ public class ExpressionHelper {
 			}
 		} else if (hasConsecutiveOps) {
 			System.err.println("consecutive only +- or *- or /-");
-			System.err.println(op);
-			return op.equals("+-") || op.equals("*-") || op.equals("/-");
+			System.err.println(op2);
+			return op2.equals("+-") || op2.equals("*-") || op2.equals("/-");
 		} else if (brackets != 0) {
 			System.err.println("opening and closing brackets not same");
 			return false;
@@ -1052,7 +1054,8 @@ public class ExpressionHelper {
 		// System.out.println(evaluate("3/y+x/y"));
 		// System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
 		// System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
-		System.out.println(isTautology("x*x/2-1=0"));
+//		System.out.println(isValidExpression("x*x/-1*2"));
+		System.out.println(isTautology("x*x/-1*2>=0"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
