@@ -679,7 +679,7 @@ public class ExpressionHelper {
 					System.err.println("opening bracket should not be followed by op");
 					return false;
 				}
-				
+
 				if (isOp) {
 					hasConsecutiveOps = true;
 					op = op + components[i];
@@ -691,9 +691,9 @@ public class ExpressionHelper {
 				if (components[i].matches("-||\\*|/|%|&|\\|")) {
 					hasOtherOp = true;
 				}
-				
+
 				isOpBrac = false;
-				
+
 			} else if (components[i].matches("\\(")) {
 				brackets++;
 				isOpBrac = true;
@@ -726,12 +726,15 @@ public class ExpressionHelper {
 			} else {
 				return !hasOtherOp;
 			}
-		}else if (hasConsecutiveOps) {
+		} else if (hasConsecutiveOps) {
 			System.err.println("consecutive only +- or *- or /-");
 			System.err.println(op);
 			return op.equals("+-") || op.equals("*-") || op.equals("/-");
 		} else if (brackets != 0) {
 			System.err.println("opening and closing brackets not same");
+			return false;
+		} else if (components[0].matches("-|\\+|\\*|/|%|&|\\|") || components[components.length-1].matches("-|\\+|\\*|/|%|&|\\|")){
+			System.err.println("cannot start or end with op");
 			return false;
 		} else {
 			return true;
@@ -851,36 +854,40 @@ public class ExpressionHelper {
 
 			if (isValidExpression(left) && isValidExpression(right)) {
 
-				fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
+				if (isValidExpression(left) && isValidExpression(right)) {
 
-				switch (expDes.getComparatorString()) {
+					fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
 
-				case "=":
-					return isEqual && !isGreater && !isLesser;
+					switch (expDes.getComparatorString()) {
 
-				case "!=":
-				case "<>":
-					return !(isEqual && !isGreater && !isLesser);
+					case "=":
+						return isEqual && !isGreater && !isLesser;
 
-				case ">":
-					return isGreater && !isEqual;
+					case "!=":
+					case "<>":
+						return !(isEqual && !isGreater && !isLesser);
 
-				case "<":
-					return isLesser && !isEqual;
+					case ">":
+						return isGreater && !isEqual;
 
-				case "<=":
-					return isEqual && isGreater;
+					case "<":
+						return isLesser && !isEqual;
 
-				case ">=":
-					return isEqual && isLesser;
+					case "<=":
+						return isEqual && isGreater;
 
-				default:
-					System.err.println(
-							String.format("comparator %s not recognised, bug detected", expDes.getComparatorString()));
+					case ">=":
+						return isEqual && isLesser;
+
+					default:
+						System.err.println(String.format("comparator %s not recognised, bug detected",
+								expDes.getComparatorString()));
+						return false;
+
+					}
+				} else {
 					return false;
-
 				}
-
 			} else {
 				return false;
 			}
@@ -932,7 +939,7 @@ public class ExpressionHelper {
 		System.out.println(isTautology("a==>b"));
 		System.out.println(isTautology("a>==b"));
 		System.out.println(isValidExpression("x/*-5"));
-		System.out.println(isValidExpression("(gskd1/1)"));
+		System.out.println(isValidExpression(""));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
