@@ -143,7 +143,7 @@ public class SympySolver {
 
     public static void main(String[] args) {
         SympySolver ss = new SympySolver();
-        solve("x*x-4*x+4");
+        solve("x*x");
     }
 
 }

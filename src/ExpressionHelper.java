@@ -1,4 +1,5 @@
 
+import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -866,6 +867,7 @@ public class ExpressionHelper {
 				boolean hasVariable = false;
 				boolean hasNull = false;
 				int varCount = 0;
+				String var = "";
 				
 				fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
 				String[] components = parseSingle(fullExpression, true);
@@ -878,6 +880,7 @@ public class ExpressionHelper {
 					} else if (isValidVariable(components[i])) {
 						hasVariable = true;
 						varCount++;
+						var = components[i];
 					} else if (isValidNull(components[i])) {
 						hasNull = true;
 					}
@@ -898,6 +901,7 @@ public class ExpressionHelper {
 						String[] result = SympySolver.solve(fullExpression);
 						if (result[1] == null) {
 							// no roots
+							fullExpression.replaceAll(var, "1");
 							
 						} else {
 							String roots = result[1];
