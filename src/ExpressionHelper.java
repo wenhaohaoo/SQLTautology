@@ -917,7 +917,7 @@ public class ExpressionHelper {
 						} else {
 							String roots = results[1];
 
-							if (roots.contains("*I*")) {
+							if (roots.contains("*I")) {
 								System.err.println("no real roots, imaginary");
 								return false;
 							} else {
@@ -938,6 +938,19 @@ public class ExpressionHelper {
 												root = -root;
 											}
 											token = "" + root;
+										}
+										
+										if (token.contains("**")) {
+											String[] sep = token.split("(\\*\\*)");
+											String base = sep[0];
+											String power = sep[1];
+											if (power.contains("/")) {
+												sep = power.split("/");
+												String num = sep[0].replace("(", "");
+												String denom = sep[1].replaceAll("\\)", "");
+												power = (Float.parseFloat(num) / Float.parseFloat(denom)) + "";
+											}
+											token = Math.pow(Float.parseFloat(base), Float.parseFloat(power)) + "";
 										}
 										
 										floatRoots.add(Float.parseFloat(token));
@@ -1054,7 +1067,7 @@ public class ExpressionHelper {
 		// System.out.println(evaluate("3/y+x/y"));
 		// System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
 		// System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
-		System.out.println(isValidExpression("-(x*x)/2"));
+		System.out.println(isTautology("(x*x*x*x-2)=0"));
 //		System.out.println(isTautology("x*x/-1*2>=0"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
