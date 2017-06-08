@@ -2,6 +2,7 @@
 import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -866,9 +867,9 @@ public class ExpressionHelper {
 				boolean hasString = false;
 				boolean hasVariable = false;
 				boolean hasNull = false;
-				int varCount = 0;
+				boolean moreThanOneVar = false;
 				String var = "";
-				
+
 				fullExpression = expDes.getLeftExpression() + "- (" + expDes.getRightExpression() + ")";
 				String[] components = parseSingle(fullExpression, true);
 
@@ -879,43 +880,91 @@ public class ExpressionHelper {
 						hasString = true;
 					} else if (isValidVariable(components[i])) {
 						hasVariable = true;
-						varCount++;
-						var = components[i];
+						if (!var.equals("") && !var.equals(components[i])) {
+							moreThanOneVar = true;
+						} else {
+							var = components[i];
+						}
 					} else if (isValidNull(components[i])) {
 						hasNull = true;
 					}
 				}
 
-				if (SympySolver.solve(left)[0].equals(SympySolver.solve(right)[0])) {
-					isEqual = true;
-					isGreater = false;
-					isLesser = false;
-				} else if (hasString) {
-					
+				if (hasString) {
+
+					/* don't know what to do with Strings yet */
+
 				} else if (hasVariable) {
-					
-					if (varCount > 1) {
+			        
+					if (moreThanOneVar) {
 						System.err.println("unable to solve for more than 1 var");
-						return false; 
+						return false;
 					} else {
-						String[] result = SympySolver.solve(fullExpression);
+						String[] result = evaluate(fullExpression);
 						if (result[1] == null) {
 							// no roots
-							fullExpression.replaceAll(var, "1");
-							
+							float ans = subIn(fullExpression, var, "1");
+							if (ans > 0) {
+								isEqual = false;
+								isGreater = true;
+								isLesser = false;
+							} else if (ans < 0) {
+								isEqual = false;
+								isGreater = false;
+								isLesser = true;
+							} else {
+								isEqual = true;
+								isGreater = false;
+								isLesser = false;
+							}
 						} else {
 							String roots = result[1];
+
 							if (roots.contains("*I*")) {
 								System.err.println("no real roots, imaginary");
 								return false;
 							} else {
-								
+								StringTokenizer tokenizer = new StringTokenizer(roots, ",");
+								ArrayList<Float> floatRoots = new ArrayList<Float>();
+								ArrayList<Float> yValList = new ArrayList<Float>();
+								while (tokenizer.hasMoreTokens()) {
+									String token = tokenizer.nextToken().trim();
+									token = token.substring(0, token.indexOf(":")).replace("{", "").replace("}", "");
+
+									floatRoots.add(Float.parseFloat(token));
+								}
+
+								for (int i = 0; i < floatRoots.size(); i++) {
+									float yVal = subIn(result[2], var, floatRoots.get(i).toString());
+									yValList.add(yVal);
+								}
+
+								float max = Collections.max(yValList);
+								float min = Collections.min(yValList);
+
+								if (yValList.contains(0)) {
+									isEqual = true;
+								} else {
+									isEqual = false;
+								}
+
+								if (max >= 0 && min >= 0) {
+									isGreater = true;
+									isLesser = false;
+								} else if (max <= 0 && min <= 0) {
+									isGreater = false;
+									isLesser = true;
+								} else {
+									System.err.println("graph cuts the x-axis, not tautology");
+									return false;
+								}
+
 							}
 						}
 					}
-					
+
 				} else {
-					float result = Float.parseFloat(SympySolver.solve(fullExpression)[0]);
+					float result = Float.parseFloat(evaluate(fullExpression)[0]);
 					if (result == 0) {
 						isEqual = true;
 						isGreater = false;
@@ -947,16 +996,15 @@ public class ExpressionHelper {
 					return isLesser && !isEqual;
 
 				case "<=":
-					return isEqual && isGreater;
+					return isEqual || isLesser;
 
 				case ">=":
-					return isEqual && isLesser;
+					return isEqual || isGreater;
 
 				default:
 					System.err.println(
 							String.format("comparator %s not recognised, bug detected", expDes.getComparatorString()));
 					return false;
-
 				}
 
 			} else {
@@ -965,6 +1013,12 @@ public class ExpressionHelper {
 		} else {
 			return false;
 		}
+
+	}
+
+	private static float subIn(String eqn, String var, String val) {
+		eqn = eqn.replaceAll(var, val);
+		return Float.parseFloat(SympySolver.solve(eqn)[0]);
 
 	}
 
@@ -988,29 +1042,8 @@ public class ExpressionHelper {
 		// System.out.println(evaluate("3/y+x/y"));
 		// System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
 		// System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
-		System.out.println(isTautology("a=b"));
-		System.out.println(isTautology("a!=b"));
-		System.out.println(isTautology("a<>b"));
-		System.out.println(isTautology("a<=b"));
-		System.out.println(isTautology("a>=b"));
-		System.out.println(isTautology("a>b"));
-		System.out.println(isTautology("a<b"));
-		System.out.println("---");
-		System.out.println(isTautology("a><b"));
-		System.out.println(isTautology("a!<b"));
-		System.out.println(isTautology("a<!b"));
-		System.out.println(isTautology("a=>b"));
-		System.out.println(isTautology("a<>=b"));
-		System.out.println(isTautology("a!>b"));
-		System.out.println(isTautology("a==b"));
-		System.out.println(isTautology("a=!b"));
-		System.out.println(isTautology("a===b"));
-		System.out.println(isTautology("a=<b"));
-		System.out.println(isTautology("a==!b"));
-		System.out.println(isTautology("a==>b"));
-		System.out.println(isTautology("a>==b"));
-		System.out.println(isValidExpression("x/*-5"));
-		System.out.println(isValidExpression(""));
+
+		System.out.println(isTautology("x*x>0"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);

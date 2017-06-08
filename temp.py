@@ -1,4 +1,4 @@
 from sympy import *
-x1=symbols('x1')
-print(factor(simplify(x1*x1)))
-print(roots(factor(simplify(x1*x1))))
+print(factor(simplify(2*0.0)))
+print(roots(factor(simplify(2*0.0))))
+print(diff(factor(simplify(2*0.0))))
