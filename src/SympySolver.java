@@ -17,6 +17,7 @@ public class SympySolver {
         final String PRINT_FUNCTION = "print(factor(simplify(%1$s)))\n";
         final String PRINT_ROOTS = "print(roots(factor(simplify(%1$s))))\n";
         final String PRINT_DIFF = "print(diff(factor(simplify(%1$s))))\n";
+        final String PRINT_DEG = "print(degree(factor(simplify(%1$s))))\n";
 
         ArrayList<String> script = new ArrayList<String>();
         String[] parser = ExpressionHelper.parseSingle(expression, true);
@@ -52,6 +53,7 @@ public class SympySolver {
         script.add(String.format(PRINT_FUNCTION, modifiedExpression));
         script.add(String.format(PRINT_ROOTS, modifiedExpression));
         script.add(String.format(PRINT_DIFF, modifiedExpression));
+        script.add(String.format(PRINT_DEG, modifiedExpression));
 
         return script.toArray(new String[script.size()]);
     }
@@ -143,12 +145,13 @@ public class SympySolver {
         System.out.println("RESULT: " + results[0]);
         System.out.println("ROOTS: " + results[1]);
         System.out.println("DIFF: " + results[2]);
+//        System.out.println("DEG: " + results[3]);
         return results;
     }
 
     public static void main(String[] args) {
         SympySolver ss = new SympySolver();
-        solve("x*x**2");
+        solve("2");
     }
 
 }

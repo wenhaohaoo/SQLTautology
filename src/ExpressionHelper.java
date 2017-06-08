@@ -919,37 +919,54 @@ public class ExpressionHelper {
 								System.err.println("no real roots, imaginary");
 								return false;
 							} else {
-								StringTokenizer tokenizer = new StringTokenizer(roots, ",");
-								ArrayList<Float> floatRoots = new ArrayList<Float>();
-								ArrayList<Float> yValList = new ArrayList<Float>();
-								while (tokenizer.hasMoreTokens()) {
-									String token = tokenizer.nextToken().trim();
-									token = token.substring(0, token.indexOf(":")).replace("{", "").replace("}", "");
-									floatRoots.add(Float.parseFloat(token));
-								}
-
-								for (int i = 0; i < floatRoots.size(); i++) {
-									float yVal = subIn(results[2], var, floatRoots.get(i).toString());
-									yValList.add(yVal);
-								}
-
-								float max = Collections.max(yValList);
-								float min = Collections.min(yValList);
-
-								if (yValList.contains(0)) {
-									isEqual = true;
+								float degree = Float.parseFloat(results[3]);
+								if (degree%2 == 0) {
+									StringTokenizer tokenizer = new StringTokenizer(roots, ",");
+									ArrayList<Float> floatRoots = new ArrayList<Float>();
+									ArrayList<Float> yValList = new ArrayList<Float>();
+									while (tokenizer.hasMoreTokens()) {
+										String token = tokenizer.nextToken().trim();
+										token = token.substring(0, token.indexOf(":")).replace("{", "").replace("}", "");
+										
+										if (token.contains("sqrt")) {										
+											String removedSqrt = token.substring(token.indexOf("sqrt(")+5);
+											String removedBrac = removedSqrt.substring(0, removedSqrt.indexOf(")"));
+											double root = Math.sqrt(Double.parseDouble(removedBrac));
+											if (token.startsWith("-")) {
+												root = -root;
+											}
+											token = "" + root;
+										}
+										
+										floatRoots.add(Float.parseFloat(token));
+									}
+	
+									for (int i = 0; i < floatRoots.size(); i++) {
+										float yVal = subIn(results[2], var, floatRoots.get(i).toString());
+										yValList.add(yVal);
+									}
+	
+									float max = Collections.max(yValList);
+									float min = Collections.min(yValList);
+	
+									if (yValList.contains(0)) {
+										isEqual = true;
+									} else {
+										isEqual = false;
+									}
+	
+									if (max >= 0 && min >= 0) {
+										isGreater = true;
+										isLesser = false;
+									} else if (max <= 0 && min <= 0) {
+										isGreater = false;
+										isLesser = true;
+									} else {
+										System.err.println("graph cuts the x-axis, not tautology");
+										return false;
+									}
 								} else {
-									isEqual = false;
-								}
-
-								if (max >= 0 && min >= 0) {
-									isGreater = true;
-									isLesser = false;
-								} else if (max <= 0 && min <= 0) {
-									isGreater = false;
-									isLesser = true;
-								} else {
-									System.err.println("graph cuts the x-axis, not tautology");
+									System.err.println("degree is odd, not tautology");
 									return false;
 								}
 
@@ -1013,7 +1030,6 @@ public class ExpressionHelper {
 	private static float subIn(String eqn, String var, String val) {
 		eqn = eqn.replaceAll(var, val);
 		return Float.parseFloat(SympySolver.solve(eqn)[0]);
-
 	}
 
 	public static void main(String[] args) {
@@ -1036,13 +1052,11 @@ public class ExpressionHelper {
 		// System.out.println(evaluate("3/y+x/y"));
 		// System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
 		// System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
-
-		System.out.println(isTautology("x/x<0"));
+		System.out.println(isTautology("x*x/2-1=0"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
 		// }
-		String[] asd = new String[2];
-		asd[0] = "a";
+//		System.out.println("-(sqrt(2))".indexOf("sqrt("));
 	}
 }
