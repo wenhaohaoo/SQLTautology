@@ -736,7 +736,7 @@ public class ExpressionHelper {
 		} else if (brackets != 0) {
 			System.err.println("opening and closing brackets not same");
 			return false;
-		} else if (components[0].matches("-|\\+|\\*|/|%|&|\\|")
+		} else if (components[0].matches("\\+|\\*|/|%|&|\\|")
 				|| components[components.length - 1].matches("-|\\+|\\*|/|%|&|\\|")) {
 			System.err.println("cannot start or end with op");
 			return false;
@@ -1054,8 +1054,8 @@ public class ExpressionHelper {
 		// System.out.println(evaluate("3/y+x/y"));
 		// System.out.println(evaluate("'asd'+'asd'+zxc+'zxc'"));
 		// System.out.println(evaluate("x*(uuuuu%4+3+4*(3+s)*4/3)+2"));
-//		System.out.println(isValidExpression("x*x/-1*2"));
-		System.out.println(isTautology("x*x/-1*2>=0"));
+		System.out.println(isValidExpression("-(x*x)/2"));
+//		System.out.println(isTautology("x*x/-1*2>=0"));
 		// String[] a = parseSingle("5+4-(3*[x.y]+-2)/1");
 		// for (int i = 0; i < a.length; i++) {
 		// System.out.println(a[i]);
