@@ -10,12 +10,7 @@ public class SympySolver {
 
     private static HashMap<String, String> hashMap = new HashMap<String, String>();
     private static HashMap<String, String> reversedMap = new HashMap<String, String>();
-    private static String roots;
-
-    public SympySolver() {
-
-    }
-
+    
     private static String[] preProcess(String expression) {
         final String IMPORT_LIBRARY = "from sympy import *\n";
         final String INIT_SYMBOL = "%1$ssymbols(%2$s)\n";
@@ -59,7 +54,7 @@ public class SympySolver {
         return script.toArray(new String[script.size()]);
     }
 
-    private static String connectToPython(String[] script) {
+    private static String[] connectToPython(String[] script) {
 
         String s = null;
         ArrayList<String> results = new ArrayList<String>();
@@ -102,17 +97,12 @@ public class SympySolver {
             e.printStackTrace();
             System.exit(-1);
         }
-
-        if (results.size() > 1) {
-        	roots = results.get(1);
-        }
         
-        return results.get(0);
+        return results.toArray(new String[results.size()]);
     }
 
-    private static String postProcess(String expression) {
-//        System.out.println(expression);
-        expression = expression.replace("**", "&");
+    private static String[] postProcess(String[] results) {
+        String expression = results[0].replace("**", "&");
         String[] components = ExpressionHelper.parseSingle(expression, true);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < components.length; i++) {
@@ -139,25 +129,21 @@ public class SympySolver {
         }
         hashMap.clear();
         reversedMap.clear();
-        return sb.toString();
-    }
-
-    public static String solve(String expression) {
-        String[] sympyString = preProcess(expression);
-        String result = connectToPython(sympyString);
-        String results = postProcess(result);
-        System.out.println("RESULT: " + results);
+        results[0] = sb.toString();
         return results;
     }
-    
-    public static String getRoots() {
-    	return roots;
+
+    public static String[] solve(String expression) {
+        String[] sympyString = preProcess(expression);
+        String[] result = connectToPython(sympyString);
+        String[] results = postProcess(result);
+        System.out.println("RESULT: " + results);
+        return results;
     }
 
     public static void main(String[] args) {
         SympySolver ss = new SympySolver();
         solve("x*x*x*x*x*x*x*x*x+3");
-        System.out.println(roots);
     }
 
 }
