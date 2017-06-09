@@ -10,7 +10,7 @@ public class SympySolver {
 
     private static HashMap<String, String> hashMap = new HashMap<String, String>();
     private static HashMap<String, String> reversedMap = new HashMap<String, String>();
-    
+
     private static String[] preProcess(String expression) {
         final String IMPORT_LIBRARY = "from sympy import *\n";
         final String INIT_SYMBOL = "%1$ssymbols(%2$s)\n";
@@ -24,20 +24,39 @@ public class SympySolver {
         StringBuilder convertVarToSymbol = new StringBuilder();
         StringBuilder declareVar = new StringBuilder();
         StringBuilder modifiedExpression = new StringBuilder();
+        StringBuilder variable = new StringBuilder();
         String var = "x";
         int counter = 1;
 
         for (int i = 0; i < parser.length; i++) {
             if (ExpressionHelper.isValidVariable(parser[i]) && hashMap.containsKey(parser[i])) {
-                modifiedExpression.append(hashMap.get(parser[i]));
+                //modifiedExpression.append(hashMap.get(parser[i]));
+                variable.append(hashMap.get(parser[i]));
             } else if (ExpressionHelper.isValidVariable(parser[i])) {
                 hashMap.put(parser[i], var + counter);
                 reversedMap.put(var + counter, parser[i]);
                 declareVar.append(var + counter + ",");
                 convertVarToSymbol.append(var + counter + " ");
-                modifiedExpression.append(var + counter++);
+                //modifiedExpression.append(var + counter++);
+                variable.append(var+counter++);
+            } else if(parser[i].matches("-|\\+") || i == parser.length-1) {
+                if((variable.indexOf("/") != -1) &&
+                        (ExpressionHelper.isValidNumber(variable.substring(0,variable.indexOf("/")))
+                                || ExpressionHelper.isValidNumber(variable.substring(variable.indexOf("/")+1)))) {
+                    if(variable.indexOf("/") != -1 && i == parser.length-1) {
+                        variable.insert(0, "frac('");
+                        modifiedExpression.append(variable + parser[i] + "')");
+                        break;
+                    } else if(variable.indexOf("/") != -1) {
+                        variable.insert(0, "frac('");
+                        variable.append("')");
+                    }
+                }
+                modifiedExpression.append(variable + parser[i]);
+                variable = new StringBuilder();
             } else {
-                modifiedExpression.append(parser[i]);
+                variable.append(parser[i]);
+                //modifiedExpression.append(parser[i]);
             }
         }
 
@@ -49,7 +68,7 @@ public class SympySolver {
             convertVarToSymbol.insert(0, "'");
             script.add(String.format(INIT_SYMBOL, declareVar.toString(), convertVarToSymbol.toString()));
         }
-
+        System.err.println("ModifiedExpression: " + modifiedExpression);
         script.add(String.format(PRINT_FUNCTION, modifiedExpression));
         script.add(String.format(PRINT_ROOTS, modifiedExpression));
         script.add(String.format(PRINT_DIFF, modifiedExpression));
@@ -101,38 +120,38 @@ public class SympySolver {
             e.printStackTrace();
             System.exit(-1);
         }
-        
+
         return results.toArray(new String[results.size()]);
     }
 
     private static String[] postProcess(String[] results) {
-    	for (int k = 0; k < results.length; k++) {
-	        String expression = results[k];//.replace("**", "&");
-	        String[] components = ExpressionHelper.parseSingle(expression, true);
-	        StringBuilder sb = new StringBuilder();
-	        for (int i = 0; i < components.length; i++) {
-	            if (reversedMap.containsKey(components[i])) {
-	                components[i] = reversedMap.get(components[i]);
-	            }
-	            sb.append(components[i]);
-	        }
-	        expression = sb.toString();
-	        results[k] = sb.toString();
-    	}
-//        components = ExpressionHelper.parseSingle(expression, false);
-//        sb = new StringBuilder();
-//        String lastVar = components[0];
-//        sb.append(components[0]);
-//        for (int i = 1; i < components.length; i++) {
-//	        if (components[i].equals("&")) {
-//	            sb.replace(sb.length() - lastVar.length(), sb.length(), "");
-//	            sb.append("Math.pow(" + lastVar + ", " + components[i + 1] + ")");
-//	            lastVar = components[i+1];
-//	            i += 1;
-//	        } else {
-//	        	sb.append(components[i]);
-//	        }
-//        }
+        for (int k = 0; k < results.length; k++) {
+            String expression = results[k];//.replace("**", "&");
+            String[] components = ExpressionHelper.parseSingle(expression, true);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < components.length; i++) {
+                if (reversedMap.containsKey(components[i])) {
+                    components[i] = reversedMap.get(components[i]);
+                }
+                sb.append(components[i]);
+            }
+            expression = sb.toString();
+            results[k] = sb.toString();
+        }
+        //        components = ExpressionHelper.parseSingle(expression, false);
+        //        sb = new StringBuilder();
+        //        String lastVar = components[0];
+        //        sb.append(components[0]);
+        //        for (int i = 1; i < components.length; i++) {
+        //	        if (components[i].equals("&")) {
+        //	            sb.replace(sb.length() - lastVar.length(), sb.length(), "");
+        //	            sb.append("Math.pow(" + lastVar + ", " + components[i + 1] + ")");
+        //	            lastVar = components[i+1];
+        //	            i += 1;
+        //	        } else {
+        //	        	sb.append(components[i]);
+        //	        }
+        //        }
         hashMap.clear();
         reversedMap.clear();
         return results;
@@ -145,7 +164,7 @@ public class SympySolver {
         System.out.println("RESULT: " + results[0]);
         System.out.println("ROOTS: " + results[1]);
         System.out.println("DIFF: " + results[2]);
-//        System.out.println("DEG: " + results[3]);
+        //        System.out.println("DEG: " + results[3]);
         return results;
     }
 
